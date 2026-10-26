@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # ---------- LLM (Groq) ----------
     groq_api_key: SecretStr | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-120b"
     llm_temperature: float = Field(default=0.2, ge=0.0, le=1.0)
 
 
