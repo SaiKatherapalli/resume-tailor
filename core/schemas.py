@@ -12,6 +12,24 @@ from pydantic import BaseModel, Field, field_validator
 # ============================================================ 1. career bank
 
 
+class Contact(BaseModel):
+    """Header line of the resume. Copied as-is, the LLM never changes it."""
+
+    email: str
+    phone: str = ""
+    location: str = ""
+    links: list[str] = []  # LinkedIn, GitHub, portfolio...
+
+
+class Education(BaseModel):
+    """One degree. Copied as-is, the LLM never changes it."""
+
+    degree: str
+    school: str
+    date: str
+    details: str = ""  # e.g. "Related Coursework: ..."
+
+
 class Experience(BaseModel):
     """One job the user has had, with ALL their bullets for it."""
 
@@ -28,9 +46,11 @@ class CareerBank(BaseModel):
     """Everything true about the user's career. RAG searches inside this."""
 
     name: str
+    contact: Contact
     summary: str
     skills: dict[str, list[str]]  # {"Cloud": ["AWS", "Docker"], ...}
     experiences: list[Experience] = Field(min_length=1)
+    education: list[Education] = []
 
     @field_validator("experiences")
     @classmethod
