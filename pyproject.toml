@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-tailor"
+version = "0.1.0"
+description = "Tailor a LaTeX resume to a job description using RAG, LangChain and LangGraph"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",           # data validation + typed models (like DTOs)
+    "pydantic-settings>=2.3",  # read settings from environment variables / .env
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",             # testing
+    "ruff>=0.6",               # linter + formatter
+]
+
+[tool.setuptools.packages.find]
+include = ["core*"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]   # errors, unused code, import order, modern syntax, common bugs
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
