@@ -10,6 +10,8 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.7",           # data validation + typed models (like DTOs)
     "pydantic-settings>=2.3",  # read settings from environment variables / .env
+    "langchain-core>=0.3",     # LangChain building blocks: prompts, runnables, the | pipe
+    "langchain-groq>=0.2",     # LangChain chat model for Groq
 ]
 
 [project.optional-dependencies]
