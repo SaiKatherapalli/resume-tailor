@@ -2,6 +2,9 @@
 .env
 *.key
 
+# ---- Personal data (stays on your PC) ----
+data/career_bank.yaml
+
 # ---- Python ----
 __pycache__/
 *.py[cod]
