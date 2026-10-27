@@ -5,11 +5,12 @@ FastAPI dependencies: small functions FastAPI runs BEFORE an endpoint, and passe
 
   DB          -> a database session
   CurrentUser -> the logged-in user (or 401 if the token is missing / wrong)
+  GroqKey     -> the user's own Groq key from the X-Groq-Api-Key header, or None
 """
 
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -36,3 +37,15 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DB) -> U
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_groq_key(
+    x_groq_api_key: Annotated[str | None, Header(description="Optional: your own Groq API key")] = None,
+) -> str | None:
+    """BYOK (bring your own key): a user can send their own free Groq key.
+    Then their usage counts against their own rate limit, not the server's.
+    The key is only used for this request and never stored."""
+    return x_groq_api_key.strip() if x_groq_api_key and x_groq_api_key.strip() else None
+
+
+GroqKey = Annotated[str | None, Depends(get_groq_key)]

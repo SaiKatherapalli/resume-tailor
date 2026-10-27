@@ -24,6 +24,7 @@ dependencies = [
     "pwdlib[argon2]>=0.2",     # hash passwords (argon2)
     "pyjwt>=2.8",              # login tokens (JWT)
     "python-multipart>=0.0.9", # read form data and file uploads
+    "pypdf>=4.0",              # read text from uploaded PDF resumes
 ]
 
 [project.scripts]

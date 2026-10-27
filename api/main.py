@@ -14,7 +14,8 @@ from sqlalchemy.orm import Session
 
 from api import models  # noqa: F401  (import so the tables are registered on Base)
 from api.db import Base, get_db, make_engine
-from api.routes import auth
+from api.errors import add_error_handlers
+from api.routes import auth, career_bank
 from core.config import get_settings
 
 
@@ -34,7 +35,9 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     app = FastAPI(title="Resume Tailor API", version="0.1.0", lifespan=lifespan)
     app.state.engine = engine
+    add_error_handlers(app)
     app.include_router(auth.router)
+    app.include_router(career_bank.router)
 
     @app.get("/health", tags=["system"])
     def health(db: Annotated[Session, Depends(get_db)]) -> dict:
