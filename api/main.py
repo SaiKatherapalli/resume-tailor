@@ -32,8 +32,10 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        # Runs once at startup. Creates missing tables. (Step 21: Alembic migrations instead.)
-        Base.metadata.create_all(engine)
+        # Runs once at startup.
+        # dev: create missing tables right away. prod: tables come from `alembic upgrade head`.
+        if settings.environment == "dev":
+            Base.metadata.create_all(engine)
         fail_interrupted_jobs(engine)
         yield
         engine.dispose()  # runs once at shutdown
