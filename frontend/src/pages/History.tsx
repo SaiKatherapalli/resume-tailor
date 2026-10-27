@@ -36,7 +36,13 @@ export default function History() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-10">
+    <div className="max-w-3xl mx-auto space-y-10 relative">
+      <div className="flex justify-end sm:absolute sm:right-0 sm:top-0 sm:z-10">
+        <Link to="/tailor" className="btn-primary">
+          <Plus size={16} /> New tailoring
+        </Link>
+      </div>
+
       <PageHeader center eyebrow="Your tailored resumes" subtitle="Open a past job to see the result or download it again." />
 
       {error && <p className="alert-error">{error}</p>}
@@ -100,11 +106,6 @@ export default function History() {
           ))}
         </ul>
 
-        <div className="flex justify-end px-6 sm:px-9 py-5 bg-slate-50 border-t border-slate-200">
-          <Link to="/tailor" className="btn-primary !px-6 !py-3">
-            <Plus size={16} /> {jobs?.length === 0 ? 'Tailor your first resume' : 'New tailoring'}
-          </Link>
-        </div>
       </motion.div>
     </div>
   );

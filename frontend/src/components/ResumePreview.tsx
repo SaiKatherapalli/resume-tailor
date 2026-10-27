@@ -6,10 +6,13 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
   const contact = bank?.contact;
 
   return (
-    <div className="bg-white border border-slate-200 shadow rounded-lg p-8 text-[13px] leading-relaxed font-serif text-slate-900">
+    <div
+      id="resume-print"
+      className="bg-white border border-slate-300 shadow-[0_24px_48px_-24px_rgba(15,23,42,0.3)] rounded-lg p-8 sm:p-10 text-[13px] leading-relaxed font-serif text-slate-900 print:border-0 print:shadow-none print:rounded-none print:p-0 print:text-[10.5pt] print:leading-snug"
+    >
       {bank && (
         <header className="text-center mb-4">
-          <h2 className="text-2xl font-bold tracking-wide">{bank.name}</h2>
+          <h2 className="text-2xl font-bold tracking-wide print:text-[20pt]">{bank.name}</h2>
           <p className="text-slate-600">
             {[contact?.email, contact?.phone, contact?.location, ...(contact?.links ?? [])].filter(Boolean).join('  |  ')}
           </p>
@@ -17,7 +20,7 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
       )}
 
       <Section title="Summary">
-        <p>{resume.summary}</p>
+        <p className="text-justify [hyphens:auto]">{resume.summary}</p>
       </Section>
 
       <Section title="Skills">
@@ -32,14 +35,14 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
         {resume.experiences.map((exp) => {
           const meta = byId.get(exp.experience_id);
           return (
-            <div key={exp.experience_id} className="mb-3">
+            <div key={exp.experience_id} className="mb-3 break-inside-avoid-page">
               <div className="flex justify-between gap-4">
                 <b>{meta ? `${meta.title}, ${meta.company}` : exp.experience_id}</b>
                 <span className="text-slate-600 whitespace-nowrap">{meta?.dates}</span>
               </div>
               <ul className="list-disc pl-5 mt-1 space-y-0.5">
                 {exp.bullets.map((b, i) => (
-                  <li key={i} title={`Based on: ${b.source_ids.join(', ')}`}>
+                  <li key={i} className="break-inside-avoid text-justify [hyphens:auto]" title={`Based on: ${b.source_ids.join(', ')}`}>
                     {b.text}
                   </li>
                 ))}

@@ -32,7 +32,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col text-slate-900">
-      <Navbar authed={authed} onSignIn={signIn} onSignOut={logout} />
+      <div className="print:hidden"><Navbar authed={authed} onSignIn={signIn} onSignOut={logout} /></div>
       <AuthModal
         isOpen={authOpen}
         onClose={() => setAuthOpen(false)}
@@ -41,7 +41,7 @@ export default function App() {
           navigate('/tailor');
         }}
       />
-      <main className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 flex-1 w-full py-10 sm:py-14">
+      <main className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 flex-1 w-full py-10 sm:py-14 print:p-0 print:max-w-none">
         <Routes>
           <Route path="/" element={authed ? <Navigate to="/tailor" replace /> : <Landing onGetStarted={signIn} />} />
           <Route path="/tailor" element={guard(<Tailor />)} />
@@ -51,7 +51,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
+      <div className="print:hidden"><Footer /></div>
     </div>
   );
 }

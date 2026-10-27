@@ -42,7 +42,31 @@ export default function JobView() {
     getCareerBank().then(setBank).catch(() => undefined);
   }, []);
 
-  const download = async (kind: 'tex' | 'pdf') => {
+  // PDF = the browser prints only the resume ("Save as PDF"). No LaTeX needed on the server.
+  const printPdf = () => {
+    const previous = document.title;
+    const name = bank?.name ?? 'Resume';
+    document.title = `${name} - ${job?.result?.analysis.job_title ?? 'Resume'}`; // becomes the PDF file name
+    const restore = () => {
+      document.title = previous;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+    window.print();
+  };
+
+  // PDF: ask the server first (LaTeX, same look as the .tex). If it has no compiler (503), print from the browser.
+  const downloadPdf = async () => {
+    setDownloadError('');
+    try {
+      await downloadJobFile(id, 'pdf');
+    } catch (e) {
+      if (e instanceof ApiError && (e.status === 503 || e.status === 0)) printPdf();
+      else setDownloadError(e instanceof ApiError ? e.message : 'Download failed.');
+    }
+  };
+
+  const download = async (kind: 'tex') => {
     setDownloadError('');
     try {
       await downloadJobFile(id, kind);
@@ -64,7 +88,7 @@ export default function JobView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <div className="flex items-center gap-3">
           <Link to="/jobs" className="text-slate-500 hover:text-slate-900">
             <ArrowLeft size={20} />
@@ -78,7 +102,7 @@ export default function JobView() {
               <button className="btn-outline" onClick={() => download('tex')}>
                 <Download size={16} /> .tex
               </button>
-              <button className="btn-primary" onClick={() => download('pdf')}>
+              <button className="btn-primary" onClick={downloadPdf}>
                 <Download size={16} /> PDF
               </button>
             </>
@@ -89,7 +113,7 @@ export default function JobView() {
         </div>
       </div>
 
-      {downloadError && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{downloadError}</p>}
+      {downloadError && <p className="print:hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{downloadError}</p>}
 
       {(job.status === 'queued' || job.status === 'running') && (
         <div className="card flex items-center gap-3">
@@ -112,10 +136,10 @@ export default function JobView() {
       )}
 
       {result && (
-        <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_320px] print:block">
           <ResumePreview bank={bank} resume={result.resume} />
 
-          <aside className="space-y-4">
+          <aside className="space-y-4 print:hidden">
             <div className="card">
               <h3 className="font-semibold mb-2">Keyword match</h3>
               <p className="text-3xl font-bold text-amber-500">{Math.round(result.validation.keyword_coverage * 100)}%</p>

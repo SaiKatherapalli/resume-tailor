@@ -59,3 +59,9 @@ body {
     @apply w-9 h-9 shrink-0 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center;
   }
 }
+
+@media print {
+  @page { size: letter; margin: 0.5in; }
+  html, body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #root, main { min-height: 0 !important; height: auto !important; }
+}
