@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # ---------- Embeddings (runs locally) ----------
     embedding_model: str = "BAAI/bge-small-en-v1.5"
 
+    # ---------- Database ----------
+    # Local: a SQLite file. Server: postgresql+psycopg://user:pass@host/db
+    database_url: str = f"sqlite:///{PROJECT_ROOT / 'storage' / 'app.db'}"
+
 
 @lru_cache
 def get_settings() -> Settings:
