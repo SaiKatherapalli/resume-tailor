@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -15,7 +15,13 @@ from api.security import create_access_token, hash_password, verify_password
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+def rate_limit(request: Request) -> None:
+    """Counts register + login attempts per IP address, to stop password guessing and spam."""
+    ip = request.client.host if request.client else "unknown"
+    request.app.state.login_limiter.check(ip)
+
+
+@router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit)])
 def register(body: RegisterIn, db: DB) -> UserOut:
     user = User(email=body.email, password_hash=hash_password(body.password))
     db.add(user)
@@ -28,7 +34,7 @@ def register(body: RegisterIn, db: DB) -> UserOut:
     return UserOut.model_validate(user)
 
 
-@router.post("/login")
+@router.post("/login", dependencies=[Depends(rate_limit)])
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DB) -> TokenOut:
     """Standard OAuth2 form: 'username' (= email) and 'password'."""
     user = db.scalar(select(User).where(User.email == form.username.strip().lower()))

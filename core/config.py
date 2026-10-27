@@ -46,6 +46,13 @@ class Settings(BaseSettings):
     # ---------- Limits (protect the free Groq quota) ----------
     max_active_jobs_per_user: int = 2  # queued + running at the same time
     max_jobs_per_day: int = 20  # per user, per 24 hours
+    max_login_attempts: int = 10  # per IP address, per 5 minutes
+
+    # ---------- Server ----------
+    log_level: str = "INFO"
+    # Websites allowed to call this API from a browser (the future frontend), comma separated.
+    # Example: https://resume.example.com,http://localhost:3000
+    cors_origins: str = ""
 
 
 @lru_cache
