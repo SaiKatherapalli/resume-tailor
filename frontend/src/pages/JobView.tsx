@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Download, Loader2, Trash2 } from 'lucide-react';
-import { ApiError, deleteJob, downloadJobFile, getCareerBank, getJob } from '../lib/api';
+import { ApiError, deleteJob, downloadJobFile, getCareerBank, getJob, resumeFileName } from '../lib/api';
 import type { CareerBank, Job } from '../types';
 import ResumePreview from '../components/ResumePreview';
 import StatusBadge from '../components/StatusBadge';
@@ -43,10 +43,11 @@ export default function JobView() {
   }, []);
 
   // PDF = the browser prints only the resume ("Save as PDF"). No LaTeX needed on the server.
+  const fileName = resumeFileName(bank?.name, job?.result?.analysis.job_title, job?.result?.analysis.company);
+
   const printPdf = () => {
     const previous = document.title;
-    const name = bank?.name ?? 'Resume';
-    document.title = `${name} - ${job?.result?.analysis.job_title ?? 'Resume'}`; // becomes the PDF file name
+    document.title = fileName; // becomes the PDF file name in the print dialog
     const restore = () => {
       document.title = previous;
       window.removeEventListener('afterprint', restore);
@@ -59,7 +60,7 @@ export default function JobView() {
   const downloadPdf = async () => {
     setDownloadError('');
     try {
-      await downloadJobFile(id, 'pdf');
+      await downloadJobFile(id, 'pdf', fileName);
     } catch (e) {
       if (e instanceof ApiError && (e.status === 503 || e.status === 0)) printPdf();
       else setDownloadError(e instanceof ApiError ? e.message : 'Download failed.');
@@ -69,7 +70,7 @@ export default function JobView() {
   const download = async (kind: 'tex') => {
     setDownloadError('');
     try {
-      await downloadJobFile(id, kind);
+      await downloadJobFile(id, kind, fileName);
     } catch (e) {
       setDownloadError(e instanceof ApiError ? e.message : 'Download failed.');
     }

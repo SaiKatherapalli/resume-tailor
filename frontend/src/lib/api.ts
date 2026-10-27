@@ -130,12 +130,20 @@ export async function deleteJob(id: string): Promise<void> {
   await request(`/jobs/${id}`, { method: 'DELETE' });
 }
 
-export async function downloadJobFile(id: string, kind: 'tex' | 'pdf'): Promise<void> {
+/** First name + role + company, e.g. Sai_Software_Engineer_Amazon_resume (no extension). */
+export function resumeFileName(fullName: string | undefined, jobTitle: string | undefined, company: string | undefined): string {
+  const clean = (s: string | undefined) => (s ?? '').normalize('NFKD').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const first = clean((fullName ?? '').trim().split(/\s+/)[0]);
+  const firstName = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase(); // SAI -> Sai
+  return [firstName, clean(jobTitle), clean(company), 'resume'].filter(Boolean).join('_');
+}
+
+export async function downloadJobFile(id: string, kind: 'tex' | 'pdf', baseName?: string): Promise<void> {
   const res = await request(`/jobs/${id}/${kind}`);
   const url = URL.createObjectURL(await res.blob());
   const a = document.createElement('a');
   a.href = url;
-  a.download = `resume-${id.slice(0, 8)}.${kind}`;
+  a.download = `${baseName || `resume-${id.slice(0, 8)}`}.${kind}`;
   document.body.appendChild(a);
   a.click();
   a.remove();
