@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body {
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-lg shadow-amber-500/30 bg-gradient-to-r from-amber-500 to-orange-600 transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-300 transition hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .input {
+    @apply w-full rounded-lg bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent;
+  }
+  .label {
+    @apply block text-xs uppercase tracking-wide font-semibold text-slate-500 mb-1;
+  }
+  .card {
+    @apply bg-white border border-slate-200 rounded-2xl shadow-sm p-5;
+  }
+}

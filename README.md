@@ -25,15 +25,18 @@ analyze ──► retrieve ──► rewrite ──► validate ──► OK ─
 
 | Folder | What's inside |
 |---|---|
-| `core/` | the AI logic: schemas, LLM, embeddings, retrieval, prompts, chains, graph, validation, LaTeX, CLI |
-| `api/` | the FastAPI backend: auth, career bank, background jobs, database |
-| `templates/` | LaTeX resume templates (Jinja2) |
-| `migrations/` | database migrations (Alembic) |
-| `tests/` | pytest tests (no LLM calls, except one live test that is skipped without a key) |
+| `frontend/` | the React website (Vite + Tailwind): login, career bank, tailoring, history |
+| `backend/` | everything below; run all backend commands from this folder |
+| `backend/core/` | the AI logic: schemas, LLM, embeddings, retrieval, prompts, chains, graph, validation, LaTeX, CLI |
+| `backend/api/` | the FastAPI backend: auth, career bank, background jobs, database |
+| `backend/templates/` | LaTeX resume templates (Jinja2) |
+| `backend/migrations/` | database migrations (Alembic) |
+| `backend/tests/` | pytest tests (no LLM calls, except one live test that is skipped without a key) |
 
 ## Run locally
 
 ```powershell
+cd backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -e ".[dev]"
@@ -93,3 +96,16 @@ In production: `ENVIRONMENT=prod`, a long random `JWT_SECRET`, and a PostgreSQL 
 - Background jobs run inside the API process (FastAPI `BackgroundTasks`), so it runs with 1 worker.
   To scale, move jobs to a queue (Redis + arq/Celery) and the login rate limit to Redis.
 - The career bank is re-embedded on every job (fast for one resume). It could be cached per user.
+
+## Run the frontend
+
+Start the API first (see above), then in a second terminal:
+
+```powershell
+cd frontend
+npm install
+npm run dev        # open http://localhost:5173
+```
+
+In dev, Vite forwards `/api/*` to `http://127.0.0.1:8000`, so no CORS setup is needed.
+For a deployed site, set `VITE_API_BASE` to the API URL and add the site to `CORS_ORIGINS` in `backend/.env`.
