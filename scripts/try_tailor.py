@@ -12,6 +12,7 @@ from core.embeddings import LocalEmbeddings
 from core.latex import compile_pdf, find_compiler, render_resume
 from core.retrieval import BulletIndex
 from core.schemas import bank_to_chunks
+from core.validation import validate
 
 jd_path = sys.argv[1] if len(sys.argv) > 1 else "data/job_descriptions/backend_java.txt"
 bank = load_career_bank("data/career_bank.yaml")
@@ -35,6 +36,15 @@ for exp in resume.experiences:
     print(f"\n== {exp.experience_id} ==")
     for b in exp.bullets:
         print(f"  - {b.text}   {b.source_ids}")
+
+report = validate(bank, analysis, resume)
+print("\nVALIDATION:", "OK" if report.ok else f"{len(report.issues)} problem(s)")
+for issue in report.issues:
+    print("  PROBLEM:", issue)
+for fix in report.fixes:
+    print("  FIXED:  ", fix)
+print(f"  Keyword coverage: {report.keyword_coverage:.0%}  unused: {report.unused_keywords}")
+resume = report.resume
 
 # Save as LaTeX, and as PDF if a LaTeX compiler is installed
 out_dir = Path("output")
