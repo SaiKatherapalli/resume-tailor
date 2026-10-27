@@ -15,6 +15,7 @@ dependencies = [
     "pyyaml>=6.0",             # read YAML files
     "fastembed>=0.4",          # local embeddings model (free, no API key)
     "numpy>=1.26",             # fast math on vectors
+    "rank-bm25>=0.2.2",        # keyword search (BM25)
 ]
 
 [project.optional-dependencies]
