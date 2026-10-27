@@ -32,11 +32,18 @@ def get_chat_model(api_key: str | None = None) -> BaseChatModel:
         model=settings.groq_model,
         api_key=key,
         temperature=settings.llm_temperature,
+        max_tokens=settings.llm_max_tokens,
+        reasoning_effort=settings.llm_reasoning_effort,
         max_retries=3,  # retry automatically on rate limits / temporary errors
         timeout=60,  # seconds; never wait forever
     )
 
 
 def get_structured_llm(schema: type[BaseModel], api_key: str | None = None) -> Runnable:
-    """An LLM that answers by filling `schema` and returns a validated Pydantic object."""
-    return get_chat_model(api_key).with_structured_output(schema)
+    """An LLM that answers by filling `schema` and returns a validated Pydantic object.
+
+    method="json_schema": the model is forced to return JSON matching the schema.
+    (The default "tool calling" method failed on big outputs: the model sometimes
+    answered in plain text instead of calling the tool.)
+    """
+    return get_chat_model(api_key).with_structured_output(schema, method="json_schema")

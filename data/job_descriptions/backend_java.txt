@@ -1,0 +1,17 @@
+Senior Backend Engineer (Java)
+
+We are looking for a Senior Backend Engineer to design, build and run high-scale services.
+
+Responsibilities:
+- Design and build microservices with Java and Spring Boot
+- Build event-driven systems with Apache Kafka
+- Deploy and operate services on AWS using Docker and Kubernetes
+- Own CI/CD pipelines and improve release speed
+- Write clean, tested code (JUnit, TDD) and review teammates' code
+- Work with product and frontend teams in an Agile environment
+
+Requirements:
+- 3+ years of backend development with Java and Spring Boot
+- Strong with REST APIs, PostgreSQL and caching
+- Experience with Kafka, AWS, Docker and Kubernetes
+- Nice to have: Terraform, GraphQL, React

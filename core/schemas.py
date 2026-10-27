@@ -61,6 +61,10 @@ class CareerBank(BaseModel):
             raise ValueError(f"duplicate experience ids: {sorted(duplicates)}")
         return experiences
 
+    def all_skills(self) -> list[str]:
+        """Every skill item in one flat list."""
+        return [item for items in self.skills.values() for item in items]
+
 
 class BulletChunk(BaseModel):
     """One searchable piece of text. One bullet = one chunk.

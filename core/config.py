@@ -7,6 +7,7 @@ Example: the env variable GROQ_API_KEY fills the field `groq_api_key` (names are
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,6 +27,8 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr | None = None
     groq_model: str = "openai/gpt-oss-120b"
     llm_temperature: float = Field(default=0.2, ge=0.0, le=1.0)
+    llm_max_tokens: int = 8192  # room for the answer (reasoning models also "think" inside this)
+    llm_reasoning_effort: Literal["low", "medium", "high"] = "low"  # how long the model thinks
 
     # ---------- Embeddings (runs locally) ----------
     embedding_model: str = "BAAI/bge-small-en-v1.5"
