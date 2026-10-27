@@ -16,6 +16,7 @@ dependencies = [
     "fastembed>=0.4",          # local embeddings model (free, no API key)
     "numpy>=1.26",             # fast math on vectors
     "rank-bm25>=0.2.2",        # keyword search (BM25)
+    "jinja2>=3.1",             # fill the LaTeX template
 ]
 
 [project.optional-dependencies]
