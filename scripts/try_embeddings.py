@@ -21,8 +21,8 @@ query_vector = np.array(emb.embed_query(query))
 print(f"One vector = {len(query_vector)} numbers. First 5: {np.round(query_vector[:5], 3)}\n")
 
 # cosine similarity = how close two meanings are (1 = same, 0 = unrelated)
-scores = bullet_vectors @ query_vector / (
-    np.linalg.norm(bullet_vectors, axis=1) * np.linalg.norm(query_vector)
+scores = (
+    bullet_vectors @ query_vector / (np.linalg.norm(bullet_vectors, axis=1) * np.linalg.norm(query_vector))
 )
 
 print(f'Top 5 bullets for: "{query}"\n')

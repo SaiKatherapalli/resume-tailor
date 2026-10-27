@@ -1,17 +1,6 @@
-"""API tests. Each test gets a fresh SQLite file in a temp folder."""
+"""API basics: health check and tables."""
 
-import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy import inspect
-
-from api.main import create_app
-
-
-@pytest.fixture
-def client(tmp_path):
-    app = create_app(f"sqlite:///{tmp_path / 'test.db'}")
-    with TestClient(app) as c:  # "with" runs startup (creates tables) and shutdown
-        yield c
 
 
 def test_health(client):

@@ -23,15 +23,28 @@ TEMPLATES_DIR = PROJECT_ROOT / "templates"
 
 _REPLACE = {
     # LaTeX special characters
-    "\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#",
-    "_": r"\_", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}",
+    "\\": r"\textbackslash{}",
+    "&": r"\&",
+    "%": r"\%",
+    "$": r"\$",
+    "#": r"\#",
+    "_": r"\_",
+    "{": r"\{",
+    "}": r"\}",
+    "~": r"\textasciitilde{}",
+    "^": r"\textasciicircum{}",
     # Unicode that LLMs often produce
-    "‐": "-", "‑": "-",       # hyphen, non-breaking hyphen
-    "–": "--", "—": "---",    # en dash, em dash
-    "‘": "`", "’": "'",       # curly single quotes
-    "“": "``", "”": "''",     # curly double quotes
-    " ": " ", " ": " ",       # non-breaking spaces
-    "•": "",                       # stray bullet symbol
+    "‐": "-",
+    "‑": "-",  # hyphen, non-breaking hyphen
+    "–": "--",
+    "—": "---",  # en dash, em dash
+    "‘": "`",
+    "’": "'",  # curly single quotes
+    "“": "``",
+    "”": "''",  # curly double quotes
+    " ": " ",
+    " ": " ",  # non-breaking spaces
+    "•": "",  # stray bullet symbol
 }
 _PATTERN = re.compile("|".join(re.escape(k) for k in _REPLACE))
 
@@ -46,11 +59,15 @@ def escape_latex(value: object) -> str:
 # ------------------------------------------------------------------ 2. render
 
 _jinja = jinja2.Environment(
-    block_start_string=r"\BLOCK{", block_end_string="}",
-    variable_start_string=r"\VAR{", variable_end_string="}",
-    comment_start_string=r"\#{", comment_end_string="}",
-    trim_blocks=True, lstrip_blocks=True,
-    finalize=escape_latex,             # runs on EVERY \VAR{...}: auto-escape
+    block_start_string=r"\BLOCK{",
+    block_end_string="}",
+    variable_start_string=r"\VAR{",
+    variable_end_string="}",
+    comment_start_string=r"\#{",
+    comment_end_string="}",
+    trim_blocks=True,
+    lstrip_blocks=True,
+    finalize=escape_latex,  # runs on EVERY \VAR{...}: auto-escape
     undefined=jinja2.StrictUndefined,  # typo in template -> clear error, not a silent blank
 )
 
@@ -64,11 +81,13 @@ def build_context(bank: CareerBank, resume: TailoredResume) -> dict:
         if not tailored or not tailored.bullets:
             continue
         place = ", ".join(p for p in (exp.company, exp.location) if p)
-        experiences.append({
-            "heading": f"{exp.title}, {place}",
-            "dates": exp.dates,
-            "bullets": [b.text for b in tailored.bullets],
-        })
+        experiences.append(
+            {
+                "heading": f"{exp.title}, {place}",
+                "dates": exp.dates,
+                "bullets": [b.text for b in tailored.bullets],
+            }
+        )
 
     contact = bank.contact
     return {

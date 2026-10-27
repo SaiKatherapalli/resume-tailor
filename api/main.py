@@ -14,12 +14,16 @@ from sqlalchemy.orm import Session
 
 from api import models  # noqa: F401  (import so the tables are registered on Base)
 from api.db import Base, get_db, make_engine
+from api.routes import auth
 from core.config import get_settings
 
 
 def create_app(database_url: str | None = None) -> FastAPI:
     """Build the app. Tests pass their own database_url, so they never touch the real database."""
-    engine = make_engine(database_url or get_settings().database_url)
+    settings = get_settings()
+    if settings.environment == "prod" and settings.jwt_secret is None:
+        raise RuntimeError("JWT_SECRET must be set in prod.")
+    engine = make_engine(database_url or settings.database_url)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -30,6 +34,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
     app = FastAPI(title="Resume Tailor API", version="0.1.0", lifespan=lifespan)
     app.state.engine = engine
+    app.include_router(auth.router)
 
     @app.get("/health", tags=["system"])
     def health(db: Annotated[Session, Depends(get_db)]) -> dict:

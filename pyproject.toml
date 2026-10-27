@@ -21,6 +21,9 @@ dependencies = [
     "fastapi>=0.115",          # the web API
     "uvicorn[standard]>=0.30", # the server that runs the API
     "sqlalchemy>=2.0",         # talk to the database with Python classes
+    "pwdlib[argon2]>=0.2",     # hash passwords (argon2)
+    "pyjwt>=2.8",              # login tokens (JWT)
+    "python-multipart>=0.0.9", # read form data and file uploads
 ]
 
 [project.scripts]

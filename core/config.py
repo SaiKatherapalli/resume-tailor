@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     # Local: a SQLite file. Server: postgresql+psycopg://user:pass@host/db
     database_url: str = f"sqlite:///{PROJECT_ROOT / 'storage' / 'app.db'}"
 
+    # ---------- API ----------
+    environment: Literal["dev", "prod"] = "dev"
+    # Signs login tokens. MUST be set in prod. See .env.example for how to make one.
+    jwt_secret: SecretStr | None = None
+    jwt_expire_minutes: int = 60 * 24  # 1 day
+
 
 @lru_cache
 def get_settings() -> Settings:

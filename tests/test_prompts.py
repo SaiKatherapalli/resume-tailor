@@ -6,8 +6,14 @@ def test_blanks_are_what_we_expect():
     assert set(analyze_prompt.input_variables) == {"job_description"}
     assert set(import_prompt.input_variables) == {"resume_text"}
     assert set(rewrite_prompt.input_variables) == {
-        "job_title", "responsibilities", "keywords", "honest_keywords",
-        "original_summary", "skills_bank", "experiences", "feedback",
+        "job_title",
+        "responsibilities",
+        "keywords",
+        "honest_keywords",
+        "original_summary",
+        "skills_bank",
+        "experiences",
+        "feedback",
     }
 
 

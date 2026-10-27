@@ -39,7 +39,8 @@ def test_llm_text_is_escaped_in_output():
 
 def test_dates_and_titles_come_from_bank_not_llm():
     resume = TailoredResume(
-        summary="s", skills=[],
+        summary="s",
+        skills=[],
         experiences=[{"experience_id": "globex", "bullets": [{"text": "x", "source_ids": []}]}],
     )
     tex = render_resume(BANK, resume)

@@ -17,8 +17,10 @@ def test_vector_size():
 def test_similar_meaning_scores_higher():
     emb = LocalEmbeddings()
     query = emb.embed_query("event streaming with Apache Kafka")
-    kafka_bullet, agile_bullet = emb.embed_documents([
-        "Integrated Kafka for asynchronous communication between microservices.",
-        "Participated in sprint planning and retrospectives.",
-    ])
+    kafka_bullet, agile_bullet = emb.embed_documents(
+        [
+            "Integrated Kafka for asynchronous communication between microservices.",
+            "Participated in sprint planning and retrospectives.",
+        ]
+    )
     assert cosine(query, kafka_bullet) > cosine(query, agile_bullet)
