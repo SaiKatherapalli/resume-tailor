@@ -43,6 +43,10 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr | None = None
     jwt_expire_minutes: int = 60 * 24  # 1 day
 
+    # ---------- Limits (protect the free Groq quota) ----------
+    max_active_jobs_per_user: int = 2  # queued + running at the same time
+    max_jobs_per_day: int = 20  # per user, per 24 hours
+
 
 @lru_cache
 def get_settings() -> Settings:

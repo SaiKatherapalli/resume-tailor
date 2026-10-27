@@ -32,3 +32,26 @@ class UserOut(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class JobCreate(BaseModel):
+    job_description: str = Field(min_length=50, max_length=20_000)
+
+
+class JobSummary(BaseModel):
+    """Short version for the list of jobs."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    status: str
+    created_at: datetime
+    finished_at: datetime | None
+
+
+class JobOut(JobSummary):
+    """Full version: the result and error too."""
+
+    job_description: str
+    result: dict | None
+    error: str | None

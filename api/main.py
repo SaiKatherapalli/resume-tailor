@@ -15,7 +15,8 @@ from sqlalchemy.orm import Session
 from api import models  # noqa: F401  (import so the tables are registered on Base)
 from api.db import Base, get_db, make_engine
 from api.errors import add_error_handlers
-from api.routes import auth, career_bank
+from api.routes import auth, career_bank, jobs
+from api.worker import fail_interrupted_jobs
 from core.config import get_settings
 
 
@@ -30,6 +31,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     async def lifespan(app: FastAPI):
         # Runs once at startup. Creates missing tables. (Step 21: Alembic migrations instead.)
         Base.metadata.create_all(engine)
+        fail_interrupted_jobs(engine)
         yield
         engine.dispose()  # runs once at shutdown
 
@@ -38,6 +40,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     add_error_handlers(app)
     app.include_router(auth.router)
     app.include_router(career_bank.router)
+    app.include_router(jobs.router)
 
     @app.get("/health", tags=["system"])
     def health(db: Annotated[Session, Depends(get_db)]) -> dict:
