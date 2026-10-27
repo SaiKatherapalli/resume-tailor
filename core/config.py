@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     groq_model: str = "openai/gpt-oss-120b"
     llm_temperature: float = Field(default=0.2, ge=0.0, le=1.0)
 
+    # ---------- Embeddings (runs locally) ----------
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+
 
 @lru_cache
 def get_settings() -> Settings:
