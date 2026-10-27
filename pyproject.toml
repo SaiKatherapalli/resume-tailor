@@ -20,6 +20,9 @@ dependencies = [
     "jinja2>=3.1",             # fill the LaTeX template
 ]
 
+[project.scripts]
+resume-tailor = "core.cli:main"   # pip creates a "resume-tailor" command that runs main()
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",             # testing
