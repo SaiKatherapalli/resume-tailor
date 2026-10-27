@@ -1,0 +1,16 @@
+# Keep secrets, personal data and junk OUT of the image
+.env
+*.key
+baseResume.txt
+prompt.txt
+data/
+output/
+storage/
+.venv/
+.git/
+**/__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+tests/
+scripts/

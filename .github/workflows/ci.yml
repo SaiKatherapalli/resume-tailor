@@ -1,0 +1,51 @@
+# Runs on every push and pull request: lint, tests, and a Docker build.
+name: CI
+
+on:
+  push:
+    branches: [main, Staging]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      FASTEMBED_CACHE_PATH: /home/runner/.cache/fastembed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Cache the embedding model
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/fastembed
+          key: fastembed-bge-small-en-v1.5
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q   # live LLM tests skip themselves: no GROQ_API_KEY here
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t resume-tailor .
+      - name: Start the image and call /health
+        run: |
+          docker run -d --name app -p 8000:8000 \
+            -e JWT_SECRET=ci-only-secret -e DATABASE_URL=sqlite:////app/storage/ci.db resume-tailor
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/health && exit 0; sleep 2; done
+          docker logs app; exit 1
+      - name: Make a PDF inside the image (checks LaTeX works)
+        run: |
+          docker exec app python -c "
+          from core.schemas import CareerBank
+          from core.latex import compile_pdf, original_resume, render_resume
+          b = CareerBank(name='CI TEST', contact={'email': 'ci@example.com'}, summary='Engineer.',
+                         skills={'Lang': ['Python', 'C#']},
+                         experiences=[{'id': 'a', 'title': 'Dev', 'company': 'Co', 'dates': '2024',
+                                       'bullets': ['Cut cost by 50% & time.']}])
+          assert compile_pdf(render_resume(b, original_resume(b)))[:4] == b'%PDF'
+          print('PDF OK')"
