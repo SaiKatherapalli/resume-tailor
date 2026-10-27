@@ -3,6 +3,8 @@
 Paste a job description, get your resume rewritten for that job, as LaTeX/PDF.
 It only uses facts from your own career history: every bullet is checked against its source.
 
+**Live site:** https://resumetailor-pro.vercel.app/
+
 **Stack:** FastAPI · LangChain · LangGraph · Groq (free LLM) · fastembed (local embeddings) · BM25 · SQLAlchemy · Alembic · PostgreSQL · LaTeX · Docker
 
 ## How it works
