@@ -11,8 +11,10 @@ body {
 }
 
 @layer components {
+  /* bg-amber-500 is a solid fallback: if the gradient does not paint, white text is still readable.
+     Disabled looks grey on purpose (not "half transparent"), so the button never vanishes. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-lg shadow-amber-500/30 bg-gradient-to-r from-amber-500 to-orange-600 transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-amber-500 bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:bg-none disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed;
   }
   .btn-outline {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-300 transition hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none;
