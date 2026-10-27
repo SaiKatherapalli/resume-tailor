@@ -63,3 +63,12 @@ class TailorJob(Base):
     error: Mapped[str | None] = mapped_column(Text, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+
+    @property
+    def job_title(self) -> str | None:
+        """Role name from the analysis, for the job list. None until the job is done."""
+        return ((self.result or {}).get("analysis") or {}).get("job_title") or None
+
+    @property
+    def company(self) -> str | None:
+        return ((self.result or {}).get("analysis") or {}).get("company") or None

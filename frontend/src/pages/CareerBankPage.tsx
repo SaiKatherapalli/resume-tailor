@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Loader2, Plus, Save, Trash2, Upload } from 'lucide-react';
+import { Briefcase, ChevronRight, GraduationCap, Loader2, Plus, Save, Sparkles, Trash2, Upload, User, Wrench } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { ApiError, getCareerBank, importResume, saveCareerBank } from '../lib/api';
 import type { CareerBank, Education, Experience } from '../types';
 import GroqKeyField from '../components/GroqKeyField';
@@ -87,15 +88,14 @@ export default function CareerBankPage() {
     set({ education: bank!.education.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold">Career bank</h1>
-        <p className="text-slate-600 text-sm mt-1">
-          Everything true about your career. The AI only uses facts from here, so keep it accurate.
-        </p>
-      </div>
+    <div className="max-w-3xl mx-auto space-y-8">
+      <PageHeader
+        center
+        eyebrow="Career bank"
+        subtitle="Everything true about your career. The AI only uses facts from here, so keep it accurate."
+      />
 
-      <div className="card space-y-4">
+      <div className="panel space-y-6">
         <div>
           <label className="label">Import from a resume (.pdf, .tex, .txt, .md, max 2 MB)</label>
           <label className={`btn-outline cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -104,14 +104,25 @@ export default function CareerBankPage() {
             <input type="file" accept=".pdf,.tex,.txt,.md" className="hidden" onChange={onFile} />
           </label>
         </div>
-        <GroqKeyField />
+        <details className="group border-t border-slate-200 pt-5">
+          <summary className="flex items-center gap-1.5 cursor-pointer list-none text-sm font-semibold text-slate-600 hover:text-slate-900 transition [&::-webkit-details-marker]:hidden">
+            <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
+            Use your own Groq key (optional)
+          </summary>
+          <div className="mt-4">
+            <GroqKeyField />
+          </div>
+        </details>
       </div>
 
-      {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
-      {notice && <p className="text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">{notice}</p>}
+      {error && <p className="alert-error">{error}</p>}
+      {notice && <p className="alert-ok">{notice}</p>}
 
       {!bank ? (
-        <div className="card text-center space-y-3">
+        <div className="panel text-center !py-14 space-y-3">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center">
+            <Sparkles size={26} />
+          </div>
           <p className="text-slate-600">No career bank yet. Import a resume above, or start from scratch.</p>
           <button className="btn-outline" onClick={() => setBank(emptyBank())}>
             Start from scratch
@@ -119,8 +130,8 @@ export default function CareerBankPage() {
         </div>
       ) : (
         <>
-          <section className="card space-y-3">
-            <h2 className="font-semibold">Basics</h2>
+          <section className="panel space-y-5">
+            <SectionTitle icon={User} title="Basics" />
             <Field label="Full name" value={bank.name} onChange={(v) => set({ name: v })} />
             <div className="grid sm:grid-cols-3 gap-3">
               <Field label="Email" value={bank.contact.email} onChange={(v) => set({ contact: { ...bank.contact, email: v } })} />
@@ -138,8 +149,8 @@ export default function CareerBankPage() {
             </div>
           </section>
 
-          <section className="card space-y-3">
-            <h2 className="font-semibold">Skills</h2>
+          <section className="panel space-y-5">
+            <SectionTitle icon={Wrench} title="Skills" />
             {Object.entries(bank.skills).map(([category, items]) => (
               <div key={category} className="flex gap-2 items-end">
                 <div className="w-1/3">
@@ -180,10 +191,11 @@ export default function CareerBankPage() {
             </button>
           </section>
 
-          <section className="space-y-3">
-            <h2 className="font-semibold">Experience</h2>
+          <section className="space-y-5">
+            <SectionTitle icon={Briefcase} title="Experience" />
             {bank.experiences.map((exp, i) => (
-              <div key={i} className="card space-y-3">
+              <div key={i} className="panel space-y-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-600">Job {i + 1}</p>
                 <div className="grid sm:grid-cols-2 gap-3">
                   <Field label="Job title" value={exp.title} onChange={(v) => setExp(i, { title: v })} />
                   <Field label="Company" value={exp.company} onChange={(v) => setExp(i, { company: v })} />
@@ -237,10 +249,10 @@ export default function CareerBankPage() {
             </button>
           </section>
 
-          <section className="space-y-3">
-            <h2 className="font-semibold">Education</h2>
+          <section className="space-y-5">
+            <SectionTitle icon={GraduationCap} title="Education" />
             {bank.education.map((ed, i) => (
-              <div key={i} className="card space-y-3">
+              <div key={i} className="panel space-y-5">
                 <div className="grid sm:grid-cols-3 gap-3">
                   <Field label="Degree" value={ed.degree} onChange={(v) => setEdu(i, { degree: v })} />
                   <Field label="School" value={ed.school} onChange={(v) => setEdu(i, { school: v })} />
@@ -257,7 +269,7 @@ export default function CareerBankPage() {
             </button>
           </section>
 
-          <div className="sticky bottom-4 flex justify-end">
+          <div className="sticky bottom-4 z-10 flex justify-end rounded-2xl bg-white border border-slate-300 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)] px-5 py-3">
             <button className="btn-primary" onClick={save} disabled={saving}>
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {draft ? 'Save imported career bank' : 'Save'}
@@ -274,6 +286,17 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
     <div>
       <label className="label">{label}</label>
       <input className="input" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, title }: { icon: React.ElementType; title: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="icon-chip">
+        <Icon size={18} />
+      </div>
+      <h2 className="text-lg font-bold">{title}</h2>
     </div>
   );
 }

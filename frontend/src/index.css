@@ -1,31 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root { height: 100%; }
+html, body, #root { min-height: 100%; }
 body {
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   color: #0f172a;
+  background:
+    radial-gradient(900px 420px at 85% -80px, rgba(251, 191, 36, 0.14), transparent 70%),
+    radial-gradient(700px 380px at -5% 120px, rgba(56, 189, 248, 0.10), transparent 70%),
+    #f8fafc;
+  background-repeat: no-repeat;
+  -webkit-font-smoothing: antialiased;
 }
 
 @layer components {
-  /* bg-amber-500 is a solid fallback: if the gradient does not paint, white text is still readable.
-     Disabled looks grey on purpose (not "half transparent"), so the button never vanishes. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-amber-500 bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg shadow-amber-500/30 transition hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 disabled:bg-none disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-amber-400
+      bg-slate-900 border-2 border-slate-900 shadow-[3px_3px_0_0_#cbd5e1] transition duration-150
+      hover:bg-slate-800 hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#cbd5e1]
+      active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+      disabled:bg-slate-200 disabled:text-slate-500 disabled:border-slate-400 disabled:shadow-none disabled:pointer-events-none;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-300 transition hover:bg-slate-50 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-slate-900
+      bg-white border-2 border-slate-900 shadow-[3px_3px_0_0_#0f172a] transition duration-150
+      hover:bg-slate-50 hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#0f172a]
+      active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
+      disabled:opacity-50 disabled:pointer-events-none;
   }
   .input {
-    @apply w-full rounded-lg bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent;
+    @apply w-full rounded-lg bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400
+      px-4 py-3 text-[15px] transition focus:outline-none focus:ring-4 focus:ring-slate-900/10
+      focus:border-slate-900;
   }
   .label {
-    @apply block text-xs uppercase tracking-wide font-semibold text-slate-500 mb-1;
+    @apply block text-[11px] uppercase tracking-[0.12em] font-bold text-slate-500 mb-2.5;
   }
   .card {
-    @apply bg-white border border-slate-200 rounded-2xl shadow-sm p-5;
+    @apply bg-white border border-slate-300 rounded-2xl p-6 sm:p-8
+      shadow-[0_1px_2px_rgba(15,23,42,0.05),0_24px_48px_-24px_rgba(15,23,42,0.22)];
+  }
+  .panel {
+    @apply relative overflow-hidden bg-white border border-slate-300 rounded-2xl p-6 sm:p-9
+      shadow-[0_1px_2px_rgba(15,23,42,0.05),0_32px_64px_-28px_rgba(15,23,42,0.28)]
+      before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-1
+      before:bg-gradient-to-r before:from-amber-400 before:via-amber-500 before:to-orange-500;
+  }
+  .alert-error {
+    @apply text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3;
+  }
+  .alert-ok {
+    @apply text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3;
+  }
+  .icon-chip {
+    @apply w-9 h-9 shrink-0 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center;
   }
 }

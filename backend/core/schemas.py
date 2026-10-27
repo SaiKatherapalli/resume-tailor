@@ -93,6 +93,10 @@ class JDAnalysis(BaseModel):
     """What the job description really asks for."""
 
     job_title: str = Field(description="The job title from the job description")
+    company: str = Field(
+        default="",
+        description="The hiring company name from the job description, or an empty string if not stated",
+    )
     responsibilities: list[str] = Field(description="The 3 most important responsibilities")
     keywords: list[str] = Field(
         description="The 5-10 most important keywords an ATS will look for: technologies, "

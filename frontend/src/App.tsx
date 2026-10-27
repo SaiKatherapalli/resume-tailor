@@ -41,7 +41,7 @@ export default function App() {
           navigate('/tailor');
         }}
       />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full py-6">
+      <main className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 flex-1 w-full py-10 sm:py-14">
         <Routes>
           <Route path="/" element={authed ? <Navigate to="/tailor" replace /> : <Landing onGetStarted={signIn} />} />
           <Route path="/tailor" element={guard(<Tailor />)} />

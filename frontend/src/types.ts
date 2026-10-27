@@ -38,10 +38,12 @@ export interface JobSummary {
   status: JobStatus;
   created_at: string;
   finished_at: string | null;
+  job_title: string | null;
+  company: string | null;
 }
 
 export interface TailorResult {
-  analysis: { job_title: string; responsibilities: string[]; keywords: string[] };
+  analysis: { job_title: string; company?: string; responsibilities: string[]; keywords: string[] };
   resume: {
     summary: string;
     skills: { category: string; items: string[] }[];

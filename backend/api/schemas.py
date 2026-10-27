@@ -47,6 +47,8 @@ class JobSummary(BaseModel):
     status: str
     created_at: datetime
     finished_at: datetime | None
+    job_title: str | None = None
+    company: str | None = None
 
 
 class JobOut(JobSummary):
