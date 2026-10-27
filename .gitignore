@@ -4,6 +4,8 @@
 
 # ---- Personal data (stays on your PC) ----
 data/career_bank.yaml
+data/imported_*.yaml
+baseResume.txt
 
 # ---- Python ----
 __pycache__/
