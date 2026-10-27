@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.3",  # read settings from environment variables / .env
     "langchain-core>=0.3",     # LangChain building blocks: prompts, runnables, the | pipe
     "langchain-groq>=0.2",     # LangChain chat model for Groq
+    "langgraph>=0.2",          # graphs with loops: rewrite -> validate -> retry
     "pyyaml>=6.0",             # read YAML files
     "fastembed>=0.4",          # local embeddings model (free, no API key)
     "numpy>=1.26",             # fast math on vectors
