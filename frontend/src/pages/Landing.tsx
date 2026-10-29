@@ -26,7 +26,7 @@ const steps = [
 
 export default function Landing({ onGetStarted }: { onGetStarted: () => void }) {
   return (
-    <div className="py-10 sm:py-16">
+    <div className="py-6 sm:py-16">
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center max-w-3xl mx-auto">
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase bg-amber-100 text-amber-700">
           AI resume tailoring
@@ -37,12 +37,12 @@ export default function Landing({ onGetStarted }: { onGetStarted: () => void }) 
         <p className="mt-4 text-lg text-slate-600">
           Paste a job link or description and get your resume rewritten for it, using only the facts from your own career history.
         </p>
-        <button onClick={onGetStarted} className="btn-primary mt-8 !px-6 !py-3 text-base">
+        <button onClick={onGetStarted} className="btn-primary mt-8 !px-8 !py-3.5 text-base w-full sm:w-auto">
           Get started <ArrowRight size={18} />
         </button>
       </motion.div>
 
-      <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-12 sm:mt-16 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((s, i) => (
           <motion.div
             key={s.title}

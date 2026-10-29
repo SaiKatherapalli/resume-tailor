@@ -86,14 +86,14 @@ export default function Tailor() {
       >
         <div className="h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
 
-        <div className="px-6 sm:px-9 pt-8 pb-6">
+        <div className="px-5 sm:px-9 pt-7 sm:pt-8 pb-6">
           <label htmlFor="jd" className="label">
             Job description
           </label>
           <textarea
             id="jd"
             rows={7}
-            className="w-full min-h-[170px] resize-y rounded-xl border border-slate-200 bg-slate-50/70 px-5 py-4 text-[15px] leading-7 text-slate-900 placeholder:text-slate-400 transition focus:outline-none focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10"
+            className="w-full min-h-[170px] resize-y rounded-xl border border-slate-200 bg-slate-50/70 px-5 py-4 text-base sm:text-[15px] leading-7 text-slate-900 placeholder:text-slate-400 transition focus:outline-none focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10"
             placeholder="Paste the full job description here, or a link to the job posting…"
             value={text}
             readOnly={reading}
@@ -121,7 +121,7 @@ export default function Tailor() {
           {note && !error && <p className="alert-ok mt-5">{note}</p>}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 sm:px-9 py-5 bg-slate-50 border-t border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 sm:px-9 py-5 bg-slate-50 border-t border-slate-200">
           <div className="text-sm">
             <p className="font-semibold text-slate-700">
               {reading
@@ -137,19 +137,19 @@ export default function Tailor() {
             </p>
           </div>
           {isLink || reading ? (
-            <button className="btn-primary !px-6 !py-3" disabled={reading} onClick={() => readLink(text)}>
+            <button className="btn-primary !px-6 !py-3 w-full sm:w-auto" disabled={reading} onClick={() => readLink(text)}>
               {reading ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
               {reading ? 'Reading…' : 'Read link'}
             </button>
           ) : (
-            <button className="btn-primary !px-6 !py-3" disabled={!valid || busy || hasBank === false} onClick={submit}>
+            <button className="btn-primary !px-6 !py-3 w-full sm:w-auto" disabled={!valid || busy || hasBank === false} onClick={submit}>
               {busy ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
               {busy ? 'Starting…' : 'Tailor my resume'}
             </button>
           )}
         </div>
 
-        <details className="group px-6 sm:px-9 py-4 border-t border-slate-200">
+        <details className="group px-5 sm:px-9 py-4 border-t border-slate-200">
           <summary className="flex items-center gap-1.5 cursor-pointer list-none text-sm font-semibold text-slate-600 hover:text-slate-900 transition [&::-webkit-details-marker]:hidden">
             <ChevronRight size={16} className="transition-transform group-open:rotate-90" />
             Use your own Groq key (optional)

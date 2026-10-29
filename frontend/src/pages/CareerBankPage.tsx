@@ -98,7 +98,7 @@ export default function CareerBankPage() {
       <div className="panel space-y-6">
         <div>
           <label className="label">Import from a resume (.pdf, .tex, .txt, .md, max 2 MB)</label>
-          <label className={`btn-outline cursor-pointer ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label className={`btn-outline cursor-pointer w-full sm:w-auto ${importing ? 'opacity-50 pointer-events-none' : ''}`}>
             {importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
             {importing ? 'Reading your resume…' : 'Choose file'}
             <input type="file" accept=".pdf,.tex,.txt,.md" className="hidden" onChange={onFile} />
@@ -152,8 +152,8 @@ export default function CareerBankPage() {
           <section className="panel space-y-5">
             <SectionTitle icon={Wrench} title="Skills" />
             {Object.entries(bank.skills).map(([category, items]) => (
-              <div key={category} className="flex gap-2 items-end">
-                <div className="w-1/3">
+              <div key={category} className="flex flex-col sm:flex-row gap-2 sm:items-end rounded-xl border border-slate-200 sm:border-0 bg-slate-50/60 sm:bg-transparent p-3 sm:p-0">
+                <div className="sm:w-1/3">
                   <label className="label">Category</label>
                   <input
                     className="input"
@@ -175,7 +175,7 @@ export default function CareerBankPage() {
                   />
                 </div>
                 <button
-                  className="p-2 text-slate-400 hover:text-red-600"
+                  className="self-end sm:self-auto p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600"
                   aria-label="Remove category"
                   onClick={() => set({ skills: Object.fromEntries(Object.entries(bank.skills).filter(([k]) => k !== category)) })}
                 >
@@ -224,7 +224,7 @@ export default function CareerBankPage() {
                         onChange={(e) => setExp(i, { bullets: exp.bullets.map((x, j) => (j === k ? e.target.value : x)) })}
                       />
                       <button
-                        className="p-2 text-slate-400 hover:text-red-600 self-start"
+                        className="p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600 self-start"
                         aria-label="Remove bullet"
                         disabled={exp.bullets.length === 1}
                         onClick={() => setExp(i, { bullets: exp.bullets.filter((_, j) => j !== k) })}
@@ -269,8 +269,8 @@ export default function CareerBankPage() {
             </button>
           </section>
 
-          <div className="sticky bottom-4 z-10 flex justify-end rounded-2xl bg-white border border-slate-300 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)] px-5 py-3">
-            <button className="btn-primary" onClick={save} disabled={saving}>
+          <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex justify-end rounded-2xl bg-white border border-slate-300 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)] px-4 sm:px-5 py-3">
+            <button className="btn-primary w-full sm:w-auto" onClick={save} disabled={saving}>
               {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               {draft ? 'Save imported career bank' : 'Save'}
             </button>

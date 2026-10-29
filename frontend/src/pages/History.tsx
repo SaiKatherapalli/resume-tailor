@@ -38,7 +38,7 @@ export default function History() {
   return (
     <div className="max-w-3xl mx-auto space-y-10 relative">
       <div className="flex justify-end sm:absolute sm:right-0 sm:top-0 sm:z-10">
-        <Link to="/tailor" className="btn-primary">
+        <Link to="/tailor" className="btn-primary w-full sm:w-auto">
           <Plus size={16} /> New tailoring
         </Link>
       </div>
@@ -58,7 +58,7 @@ export default function History() {
         {!jobs && !error && (
           <ul className="divide-y divide-slate-200">
             {[0, 1, 2].map((i) => (
-              <li key={i} className="px-6 sm:px-9 py-6">
+              <li key={i} className="px-4 sm:px-9 py-6">
                 <div className="h-9 rounded-lg bg-slate-100 animate-pulse" />
               </li>
             ))}
@@ -84,12 +84,12 @@ export default function History() {
               transition={{ duration: 0.3, delay: Math.min(i, 8) * 0.04 }}
               className="group flex items-center transition hover:bg-amber-50/50"
             >
-              <Link to={`/jobs/${j.id}`} className="flex-1 flex items-center gap-4 min-w-0 pl-6 sm:pl-9 pr-3 py-5">
+              <Link to={`/jobs/${j.id}`} className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0 pl-4 sm:pl-9 pr-2 sm:pr-3 py-4 sm:py-5">
                 <div className="icon-chip">
                   <FileClock size={18} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-semibold truncate">{j.job_title ?? 'Tailored resume'}</p>
+                  <p className="font-semibold leading-snug line-clamp-2 sm:line-clamp-1 break-words">{j.job_title ?? 'Tailored resume'}</p>
                   <p className="text-xs text-slate-500 truncate" title={new Date(j.created_at + (j.created_at.endsWith('Z') ? '' : 'Z')).toLocaleString()}>
                     {[j.company, ago(j.created_at)].filter(Boolean).join(' · ')}
                   </p>
@@ -99,12 +99,12 @@ export default function History() {
                     </p>
                   )}
                 </div>
-                <div className="ml-auto">
+                <div className="ml-auto shrink-0">
                   <StatusBadge status={j.status} />
                 </div>
-                <ChevronRight size={18} className="text-slate-300 transition group-hover:text-amber-500 group-hover:translate-x-0.5" />
+                <ChevronRight size={18} className="hidden sm:block shrink-0 text-slate-300 transition group-hover:text-amber-500 group-hover:translate-x-0.5" />
               </Link>
-              <button onClick={() => remove(j.id)} className="pl-3 pr-6 sm:pr-9 self-stretch text-slate-300 hover:text-red-600 transition" aria-label="Delete job">
+              <button onClick={() => remove(j.id)} className="px-4 sm:pl-3 sm:pr-9 self-stretch text-slate-300 hover:text-red-600 active:text-red-600 transition" aria-label="Delete job">
                 <Trash2 size={16} />
               </button>
             </motion.li>

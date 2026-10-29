@@ -5,7 +5,16 @@
 @tailwind utilities;
 
 html, body, #root { min-height: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 body {
+  -webkit-tap-highlight-color: transparent;
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   color: #0f172a;
   background:
@@ -18,14 +27,14 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-amber-400
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-xl text-sm font-bold text-amber-400
       bg-slate-900 border-2 border-slate-900 shadow-[3px_3px_0_0_#cbd5e1] transition duration-150
       hover:bg-slate-800 hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#cbd5e1]
       active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
       disabled:bg-slate-200 disabled:text-slate-500 disabled:border-slate-400 disabled:shadow-none disabled:pointer-events-none;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-slate-900
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl text-sm font-bold text-slate-900
       bg-white border-2 border-slate-900 shadow-[3px_3px_0_0_#0f172a] transition duration-150
       hover:bg-slate-50 hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_#0f172a]
       active:translate-x-0.5 active:translate-y-0.5 active:shadow-none
@@ -33,7 +42,7 @@ body {
   }
   .input {
     @apply w-full rounded-lg bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400
-      px-4 py-3 text-[15px] transition focus:outline-none focus:ring-4 focus:ring-slate-900/10
+      px-4 py-3 text-base sm:text-[15px] transition focus:outline-none focus:ring-4 focus:ring-slate-900/10
       focus:border-slate-900;
   }
   .label {

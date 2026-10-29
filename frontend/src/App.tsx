@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import MobileTabs from './components/MobileTabs';
 import AuthModal from './components/AuthModal';
 import Landing from './pages/Landing';
 import Tailor from './pages/Tailor';
@@ -9,6 +10,13 @@ import CareerBankPage from './pages/CareerBankPage';
 import History from './pages/History';
 import JobView from './pages/JobView';
 import { isAuthenticated, logout } from './lib/api';
+
+/** A new page should start at the top, like a normal website (a single-page app keeps the old scroll). */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => window.scrollTo({ top: 0 }), [pathname]);
+  return null;
+}
 
 export default function App() {
   const [authed, setAuthed] = useState(isAuthenticated());
@@ -32,7 +40,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col text-slate-900">
-      <div className="print:hidden"><Navbar authed={authed} onSignIn={signIn} onSignOut={logout} /></div>
+      <ScrollToTop />
+      <Navbar authed={authed} onSignIn={signIn} onSignOut={logout} />
       <AuthModal
         isOpen={authOpen}
         onClose={() => setAuthOpen(false)}
@@ -41,7 +50,7 @@ export default function App() {
           navigate('/tailor');
         }}
       />
-      <main className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 flex-1 w-full py-10 sm:py-14 print:p-0 print:max-w-none">
+      <main className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 flex-1 w-full py-6 sm:py-14 print:p-0 print:max-w-none">
         <Routes>
           <Route path="/" element={authed ? <Navigate to="/tailor" replace /> : <Landing onGetStarted={signIn} />} />
           <Route path="/tailor" element={guard(<Tailor />)} />
@@ -51,7 +60,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <div className="print:hidden"><Footer /></div>
+      <Footer authed={authed} onGetStarted={signIn} />
+      {authed && <MobileTabs />}
     </div>
   );
 }

@@ -89,15 +89,17 @@ export default function JobView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <div className="flex items-center gap-3">
-          <Link to="/jobs" className="text-slate-500 hover:text-slate-900">
-            <ArrowLeft size={20} />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 print:hidden">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <Link to="/jobs" className="shrink-0 -ml-1 p-1 text-slate-500 hover:text-slate-900" aria-label="Back to history">
+            <ArrowLeft size={22} />
           </Link>
-          <h1 className="text-2xl font-bold">{result?.analysis.job_title ?? 'Tailoring job'}</h1>
-          <StatusBadge status={job.status} />
+          <div className="min-w-0 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="text-xl sm:text-2xl font-bold leading-snug break-words">{result?.analysis.job_title ?? 'Tailoring job'}</h1>
+            <StatusBadge status={job.status} />
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 [&>button]:flex-1 sm:[&>button]:flex-none">
           {job.status === 'done' && (
             <>
               <button className="btn-outline" onClick={() => download('tex')}>
@@ -108,7 +110,7 @@ export default function JobView() {
               </button>
             </>
           )}
-          <button className="btn-outline !text-red-600" onClick={remove} aria-label="Delete job">
+          <button className="btn-outline !text-red-600 !flex-none" onClick={remove} aria-label="Delete job">
             <Trash2 size={16} />
           </button>
         </div>

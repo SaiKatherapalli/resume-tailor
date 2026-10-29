@@ -8,7 +8,7 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
   return (
     <div
       id="resume-print"
-      className="bg-white border border-slate-300 shadow-[0_24px_48px_-24px_rgba(15,23,42,0.3)] rounded-lg p-8 sm:p-10 text-[13px] leading-relaxed font-serif text-slate-900 print:border-0 print:shadow-none print:rounded-none print:p-0 print:text-[10.5pt] print:leading-snug"
+      className="bg-white border border-slate-300 shadow-[0_24px_48px_-24px_rgba(15,23,42,0.3)] rounded-lg p-5 sm:p-10 text-[12.5px] sm:text-[13px] leading-relaxed font-serif text-slate-900 print:border-0 print:shadow-none print:rounded-none print:p-0 print:text-[10.5pt] print:leading-snug"
     >
       {bank && (
         <header className="text-center mb-4">
@@ -36,9 +36,9 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
           const meta = byId.get(exp.experience_id);
           return (
             <div key={exp.experience_id} className="mb-3 break-inside-avoid-page">
-              <div className="flex justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 print:flex-row print:justify-between print:gap-4">
                 <b>{meta ? `${meta.title}, ${meta.company}` : exp.experience_id}</b>
-                <span className="text-slate-600 whitespace-nowrap">{meta?.dates}</span>
+                <span className="text-slate-600 sm:whitespace-nowrap print:whitespace-nowrap">{meta?.dates}</span>
               </div>
               <ul className="list-disc pl-5 mt-1 space-y-0.5">
                 {exp.bullets.map((b, i) => (
@@ -55,11 +55,11 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
       {bank && bank.education.length > 0 && (
         <Section title="Education">
           {bank.education.map((ed, i) => (
-            <div key={i} className="flex justify-between gap-4">
+            <div key={i} className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 print:flex-row print:justify-between print:gap-4">
               <span>
                 <b>{ed.degree}</b>, {ed.school}
               </span>
-              <span className="text-slate-600 whitespace-nowrap">{ed.date}</span>
+              <span className="text-slate-600 sm:whitespace-nowrap print:whitespace-nowrap">{ed.date}</span>
             </div>
           ))}
         </Section>
