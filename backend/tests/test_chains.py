@@ -4,7 +4,14 @@ import pytest
 from langchain_core.runnables import RunnableLambda
 
 from core.career_bank import load_career_bank
-from core.chains import Chains, build_rewrite_input, build_tailor_pipeline, split_keywords
+from core.chains import (
+    Chains,
+    analyze_job,
+    build_rewrite_input,
+    build_tailor_pipeline,
+    short_company,
+    split_keywords,
+)
 from core.config import PROJECT_ROOT
 from core.embeddings import LocalEmbeddings
 from core.retrieval import BulletIndex
@@ -55,3 +62,23 @@ def test_rewrite_input_asks_for_right_bullet_count(bank, index):
     inputs = build_rewrite_input(bank, ANALYSIS, retrieve_candidates(bank, index, ANALYSIS))
     assert "acme | Software Engineer, Acme Corp | write 3 bullets" in inputs["experiences"]
     assert "globex | Junior Developer, Globex | write 2 bullets" in inputs["experiences"]
+
+
+def test_job_number_is_kept_only_if_it_is_in_the_job_text():
+    def chains_returning(number):
+        analysis = ANALYSIS.model_copy(update={"job_number": number})
+        return Chains(analyze=RunnableLambda(lambda _: analysis), rewrite=RunnableLambda(lambda _: None))
+
+    text = "Software Engineer II. Job ID: A-3012345. Build things."
+    assert analyze_job(chains_returning(" A-3012345 "), text).job_number == "A-3012345"
+    assert analyze_job(chains_returning("A-9999999"), text).job_number == ""  # made up
+    assert analyze_job(chains_returning(""), text).job_number == ""
+
+
+def test_short_company_drops_legal_endings():
+    assert short_company("Wipro Private Limited") == "Wipro"
+    assert short_company("Acme Corp.") == "Acme"
+    assert short_company("Globex, Inc.") == "Globex"
+    assert short_company("Clean Power Research") == "Clean Power Research"
+    assert short_company("Co") == "Co"  # never empties the name
+    assert short_company("") == ""

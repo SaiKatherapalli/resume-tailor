@@ -72,3 +72,8 @@ class TailorJob(Base):
     @property
     def company(self) -> str | None:
         return ((self.result or {}).get("analysis") or {}).get("company") or None
+
+    @property
+    def job_number(self) -> str | None:
+        """The posting's own job ID (e.g. Amazon's 'Job ID'), to tell apart two postings of one role."""
+        return ((self.result or {}).get("analysis") or {}).get("job_number") or None

@@ -107,3 +107,28 @@ def test_restart_marks_unfinished_jobs_failed(client, user):
         db.add(TailorJob(user_id=user_id, job_description="x", status=JobStatus.RUNNING))
         db.commit()
     assert worker.fail_interrupted_jobs(engine) == 1
+
+
+# ------------------------------------------------------------------ read a job link
+
+
+def test_read_link_needs_login(client):
+    assert client.post("/jobs/read-link", json={"url": "https://example.com/job"}).status_code == 401
+
+
+def test_read_link_returns_the_job_text(client, auth, monkeypatch):
+    from api.routes import jobs
+    from core.job_page import JobPosting
+
+    monkeypatch.setattr(
+        jobs, "fetch_job_posting", lambda url: JobPosting(text="Job text " * 20, title="SRE", company="Acme")
+    )
+    r = client.post("/jobs/read-link", json={"url": "https://example.com/job"}, headers=auth)
+    assert r.status_code == 200
+    assert r.json() == {"job_description": "Job text " * 20, "job_title": "SRE", "company": "Acme"}
+
+
+def test_read_link_explains_a_bad_link(client, auth):
+    r = client.post("/jobs/read-link", json={"url": "not a link"}, headers=auth)
+    assert r.status_code == 422
+    assert "valid link" in r.json()["detail"]

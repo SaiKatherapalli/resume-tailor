@@ -95,7 +95,13 @@ class JDAnalysis(BaseModel):
     job_title: str = Field(description="The job title from the job description")
     company: str = Field(
         default="",
-        description="The hiring company name from the job description, or an empty string if not stated",
+        description="The hiring company's short, everyday name, like 'Amazon' (not 'Amazon.com Services "
+        "LLC'). No legal endings such as Inc, LLC, Ltd or Services. Empty string if not stated",
+    )
+    job_number: str = Field(
+        default="",
+        description="The job ID / requisition number, copied exactly as written in the job description "
+        "(for example '3012345' from 'Job ID: 3012345'), or an empty string if none is stated",
     )
     responsibilities: list[str] = Field(description="The 3 most important responsibilities")
     keywords: list[str] = Field(

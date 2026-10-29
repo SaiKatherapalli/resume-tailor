@@ -2,6 +2,7 @@
 Tailoring jobs.
 
 Tailoring takes 20-60 seconds, too long to keep an HTTP request waiting. So:
+  POST /jobs/read-link  -> read the job description from a job link (the user checks it first)
   POST /jobs            -> 202 + job id, right away. The work starts in the background.
   GET  /jobs/{id}       -> poll until status is "done" or "failed"
   GET  /jobs/{id}/tex   -> download the LaTeX
@@ -12,17 +13,29 @@ Tailoring takes 20-60 seconds, too long to keep an HTTP request waiting. So:
 
 from datetime import timedelta
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from sqlalchemy import func, select
 
-from api.deps import DB, CurrentUser, GroqKey
+from api.deps import DB, CurrentUser, GroqKey, get_current_user
 from api.models import CareerBankRecord, JobStatus, TailorJob, now
-from api.schemas import JobCreate, JobOut, JobSummary
+from api.schemas import JobCreate, JobLinkOut, JobLinkRequest, JobOut, JobSummary
 from api.worker import run_tailor_job
 from core.config import get_settings
+from core.job_page import JobPageError, fetch_job_posting
 from core.latex import compile_pdf, find_compiler
 
 router = APIRouter(prefix="/jobs", tags=["tailor jobs"])
+
+
+@router.post("/read-link", dependencies=[Depends(get_current_user)])
+def read_job_link(body: JobLinkRequest) -> JobLinkOut:
+    """Job link -> job description text (nothing is saved). Login is required, so strangers can't use
+    the server to open web pages."""
+    try:
+        posting = fetch_job_posting(body.url)
+    except JobPageError as e:
+        raise HTTPException(422, str(e)) from None
+    return JobLinkOut(job_description=posting.text, job_title=posting.title, company=posting.company)
 
 
 @router.post("", status_code=status.HTTP_202_ACCEPTED)

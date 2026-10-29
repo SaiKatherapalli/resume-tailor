@@ -118,6 +118,17 @@ export async function createJob(jobDescription: string): Promise<Job> {
   return (await request('/jobs', { method: 'POST', ...json({ job_description: jobDescription }) }, true)).json();
 }
 
+export interface JobLink {
+  job_description: string;
+  job_title: string;
+  company: string;
+}
+
+/** Read the job description from a job link. The server saves nothing; the user checks the text first. */
+export async function readJobLink(url: string): Promise<JobLink> {
+  return (await request('/jobs/read-link', { method: 'POST', ...json({ url }) })).json();
+}
+
 export async function getJob(id: string): Promise<Job> {
   return (await request(`/jobs/${id}`)).json();
 }

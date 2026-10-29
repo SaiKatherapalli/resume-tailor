@@ -25,7 +25,9 @@ analyze_prompt = ChatPromptTemplate.from_messages(
             "1. the job title\n"
             "2. the THREE most important responsibilities\n"
             "3. the 5-10 most important keywords an ATS will look for. Prefer concrete "
-            "technologies, skills and methods. Keep each one short, like 'Spring Boot'.\n\n"
+            "technologies, skills and methods. Keep each one short, like 'Spring Boot'.\n"
+            "4. the job ID or requisition number, only if the text states one. Copy it exactly. "
+            "Never guess; leave it empty if there is none.\n\n"
             "<job_description>\n{job_description}\n</job_description>",
         ),
     ]

@@ -18,7 +18,7 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from core.chains import Chains, build_rewrite_input, retrieve_candidates
+from core.chains import Chains, analyze_job, build_rewrite_input, retrieve_candidates
 from core.retrieval import BulletIndex
 from core.schemas import CareerBank, JDAnalysis, TailoredResume
 from core.validation import ValidationReport, validate
@@ -44,7 +44,7 @@ def build_graph(chains: Chains):
     """Chains are passed in, so tests can use fake LLMs."""
 
     def analyze(state: TailorState) -> dict:
-        return {"analysis": chains.analyze.invoke({"job_description": state["job_description"]})}
+        return {"analysis": analyze_job(chains, state["job_description"])}
 
     def retrieve(state: TailorState) -> dict:
         return {"candidates": retrieve_candidates(state["bank"], state["index"], state["analysis"])}

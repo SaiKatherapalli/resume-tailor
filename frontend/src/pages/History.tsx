@@ -93,6 +93,11 @@ export default function History() {
                   <p className="text-xs text-slate-500 truncate" title={new Date(j.created_at + (j.created_at.endsWith('Z') ? '' : 'Z')).toLocaleString()}>
                     {[j.company, ago(j.created_at)].filter(Boolean).join(' · ')}
                   </p>
+                  {j.job_number && (
+                    <p className="text-xs text-slate-400 truncate mt-1">
+                      Job ID <span className="font-medium tabular-nums text-slate-500">{j.job_number}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="ml-auto">
                   <StatusBadge status={j.status} />

@@ -7,6 +7,7 @@ Each step ADDS a key to a dict, so later steps can use everything before them.
 """
 
 import math
+import re
 from dataclasses import dataclass
 
 from langchain_core.runnables import Runnable, RunnablePassthrough
@@ -33,6 +34,33 @@ def build_chains(api_key: str | None = None) -> Chains:
 
 
 # ------------------------------------------------------------------ helpers
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", "", text).lower()
+
+
+_LEGAL_ENDING = re.compile(
+    r"[,\s]+(?:inc|llc|l\.l\.c|ltd|limited|corp|corporation|co|pvt|private|plc|gmbh)\.?$", re.IGNORECASE
+)
+
+
+def short_company(name: str) -> str:
+    """'Wipro Private Limited' -> 'Wipro'. The LLM is asked for a short name; this catches what it misses."""
+    name = name.strip()
+    while (short := _LEGAL_ENDING.sub("", name)) != name and short:
+        name = short
+    return name
+
+
+def analyze_job(chains: Chains, job_description: str) -> JDAnalysis:
+    """Run the analyze step. A job number the LLM did not copy from the text is thrown away."""
+    analysis = chains.analyze.invoke({"job_description": job_description})
+    analysis.company = short_company(analysis.company)
+    number = analysis.job_number.strip()
+    found = bool(number) and _squash(number) in _squash(job_description)
+    analysis.job_number = number if found else ""
+    return analysis
 
 
 def split_keywords(bank: CareerBank, keywords: list[str]) -> tuple[list[str], list[str]]:
@@ -92,9 +120,7 @@ def build_tailor_pipeline(chains: Chains) -> Runnable:
     Output: the same dict + "analysis", "candidates", "resume"
     """
     return (
-        RunnablePassthrough.assign(
-            analysis=lambda x: chains.analyze.invoke({"job_description": x["job_description"]})
-        )
+        RunnablePassthrough.assign(analysis=lambda x: analyze_job(chains, x["job_description"]))
         | RunnablePassthrough.assign(
             candidates=lambda x: retrieve_candidates(x["bank"], x["index"], x["analysis"])
         )

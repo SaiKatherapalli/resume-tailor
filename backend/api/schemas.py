@@ -38,6 +38,18 @@ class JobCreate(BaseModel):
     job_description: str = Field(min_length=50, max_length=20_000)
 
 
+class JobLinkRequest(BaseModel):
+    url: str = Field(min_length=4, max_length=2000)
+
+
+class JobLinkOut(BaseModel):
+    """The job read from a link. The user checks it, then sends it to POST /jobs as usual."""
+
+    job_description: str
+    job_title: str = ""
+    company: str = ""
+
+
 class JobSummary(BaseModel):
     """Short version for the list of jobs."""
 
@@ -49,6 +61,7 @@ class JobSummary(BaseModel):
     finished_at: datetime | None
     job_title: str | None = None
     company: str | None = None
+    job_number: str | None = None
 
 
 class JobOut(JobSummary):
