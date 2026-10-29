@@ -9,8 +9,8 @@ const steps = [
   },
   {
     icon: Sparkles,
-    title: 'Paste a job description',
-    text: 'The AI finds the keywords, picks your best-matching bullets and rewrites them for that job.',
+    title: 'Paste a job link or description',
+    text: 'Drop in the job link or its text. The AI finds the keywords, picks your best-matching bullets and rewrites them for that job.',
   },
   {
     icon: ShieldCheck,
@@ -35,7 +35,7 @@ export default function Landing({ onGetStarted }: { onGetStarted: () => void }) 
           One resume. <span className="text-amber-500">Tailored</span> to every job.
         </h1>
         <p className="mt-4 text-lg text-slate-600">
-          Paste a job description and get your resume rewritten for it, using only the facts from your own career history.
+          Paste a job link or description and get your resume rewritten for it, using only the facts from your own career history.
         </p>
         <button onClick={onGetStarted} className="btn-primary mt-8 !px-6 !py-3 text-base">
           Get started <ArrowRight size={18} />
