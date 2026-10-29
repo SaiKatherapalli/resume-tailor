@@ -64,7 +64,9 @@ def build_rewrite_input(
     experiences = []
     for exp in bank.experiences:
         docs = candidates[exp.id]
-        lines = "\n".join(f"  [{d.metadata['id']}] {d.page_content}" for d in docs)
+        lines = "\n".join(
+            f"  [{d.metadata['id']}] ({len(d.page_content.split())} words) {d.page_content}" for d in docs
+        )
         count = min(exp.max_bullets, len(docs))
         experiences.append(
             f"Experience id: {exp.id} | {exp.title}, {exp.company} | write {count} bullets\n{lines}"

@@ -122,6 +122,8 @@ class SkillRow(BaseModel):
 class TailoredResume(BaseModel):
     """The rewritten resume CONTENT. Python, not the LLM, turns this into LaTeX."""
 
-    summary: str = Field(description="Professional summary, 3-4 sentences, plain text")
-    skills: list[SkillRow] = Field(description="Skill rows, most relevant categories first")
+    summary: str = Field(description="Professional summary, 5-6 sentences (about 90-120 words), plain text")
+    skills: list[SkillRow] = Field(
+        description="8-10 skill rows named in the job's words, most relevant first"
+    )
     experiences: list[TailoredExperience]

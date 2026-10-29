@@ -80,12 +80,39 @@ def test_python_fixes_small_problems():
     ]
     report = validate(BANK, ANALYSIS, make_resume([GOOD] * 5, skills=skills))
     assert report.ok  # fixed, so no retry needed
-    assert [r.items for r in report.resume.skills] == [["Python"]]
+    all_items = [i for r in report.resume.skills for i in r.items]
+    assert "Mockito" not in all_items and "Spring Cloud" not in all_items  # not in the bank
     assert len(report.resume.experiences[0].bullets) == 3  # acme max_bullets
-    assert len(report.fixes) == 3
+    assert len(report.fixes) == 4  # 2 fake skills, extra bullets, forgotten skills
+
+
+def test_forgotten_skills_are_put_back_next_to_their_neighbours():
+    report = validate(BANK, ANALYSIS, make_resume([GOOD]))  # the LLM only listed Python
+    rows = {r.category: r.items for r in report.resume.skills}
+    assert rows["Programming"] == ["Python", "Java", "C#"]
+    assert rows["Cloud"] == ["AWS", "Docker", "Kubernetes"]
+    assert rows["Databases"] == ["PostgreSQL", "Redis"]
+
+
+def test_repeated_skill_stays_in_first_row_only():
+    skills = [
+        {"category": "A", "items": ["Python", "Docker"]},
+        {"category": "B", "items": ["Docker", "AWS"]},
+    ]
+    report = validate(BANK, ANALYSIS, make_resume([GOOD], skills=skills))
+    assert [i for r in report.resume.skills for i in r.items].count("Docker") == 1
+
+
+def test_tool_named_in_a_bullet_is_a_valid_skill():
+    skills = [{"category": "Testing", "items": ["pytest"]}]  # in a bullet, not in the skills list
+    report = validate(BANK, ANALYSIS, make_resume([GOOD], skills=skills))
+    assert report.resume.skills[0].items == ["pytest"]
 
 
 def test_keyword_coverage():
-    report = validate(BANK, ANALYSIS, make_resume([GOOD]))
-    assert report.unused_keywords == ["Redis"]  # candidate has Redis but didn't use it
+    analysis = JDAnalysis(
+        job_title="Backend Engineer", responsibilities=["Build APIs"], keywords=["FastAPI", "pytest"]
+    )
+    report = validate(BANK, analysis, make_resume([GOOD]))
+    assert report.unused_keywords == ["pytest"]  # candidate has pytest (in a bullet) but didn't use it
     assert report.keyword_coverage == 0.5

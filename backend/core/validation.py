@@ -99,16 +99,39 @@ def validate(bank: CareerBank, analysis: JDAnalysis, resume: TailoredResume) -> 
             if new_skills:
                 issues.append(f"{short} mentions {new_skills}, not in its sources {b.source_ids}.")
 
-    # 3. Skills: keep only skills from the bank (Python fixes this, no retry needed)
+    # 3. Skills: keep only skills from the bank, or tools the bank's own text names
+    #    (e.g. "Apache Kafka" in a bullet). Python fixes this, no retry needed.
     allowed = {s.lower() for s in bank_skills}
+    bank_text = " ".join([bank.summary, *bank_skills, *(b for e in bank.experiences for b in e.bullets)])
     skills: list[SkillRow] = []
+    seen: set[str] = set()  # each skill appears once, in the first row that has it
     for row in resume.skills:
-        kept = [i for i in row.items if i.lower() in allowed]
-        dropped = [i for i in row.items if i.lower() not in allowed]
+        kept = []
+        for item in row.items:
+            if (item.lower() in allowed or has_term(bank_text, item)) and item.lower() not in seen:
+                kept.append(item)
+                seen.add(item.lower())
+        dropped = [i for i in row.items if i not in kept]
         if dropped:
-            fixes.append(f"removed skills not in the bank: {dropped}")
+            fixes.append(f"removed skills that are not in the bank or are repeated: {dropped}")
         if kept:
             skills.append(SkillRow(category=row.category, items=kept))
+
+    # The LLM often forgets some skills. Put them back next to their original neighbours.
+    forgotten = [s for s in bank_skills if s.lower() not in seen]
+    if forgotten:
+        fixes.append(f"put back skills the model left out: {forgotten}")
+    for category, items in bank.skills.items():
+        neighbours = {s.lower() for s in items}
+        for item in items:
+            if item.lower() in seen:
+                continue
+            row = max(skills, key=lambda r: len(neighbours & {i.lower() for i in r.items}), default=None)
+            if row and neighbours & {i.lower() for i in row.items}:
+                row.items.append(item)
+            else:
+                skills.append(SkillRow(category=category, items=[item]))
+            seen.add(item.lower())
 
     cleaned = TailoredResume(summary=resume.summary, skills=skills, experiences=experiences)
 
