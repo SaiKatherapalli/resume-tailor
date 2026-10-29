@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Link2, Loader2, Wand2 } from 'lucide-react';
+import { ChevronRight, Lightbulb, Link2, Loader2, Wand2 } from 'lucide-react';
 import { ApiError, createJob, getCareerBank, readJobLink } from '../lib/api';
 import GroqKeyField from '../components/GroqKeyField';
 import PageHeader from '../components/PageHeader';
@@ -159,6 +159,14 @@ export default function Tailor() {
           </div>
         </details>
       </motion.div>
+
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <Lightbulb size={18} className="mt-0.5 shrink-0 text-amber-600" />
+        <p>
+          <span className="font-semibold">Tip to get noticed:</span> apply to jobs posted in the last week, ideally
+          within 1 to 2 days. Early applicants tend to get seen first, before the pile grows.
+        </p>
+      </div>
     </div>
   );
 }
