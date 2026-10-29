@@ -163,8 +163,9 @@ export default function Tailor() {
       <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
         <Lightbulb size={18} className="mt-0.5 shrink-0 text-amber-600" />
         <p>
-          <span className="font-semibold">Tip to get noticed:</span> apply to jobs posted in the last week, ideally
-          within 1 to 2 days. Early applicants tend to get seen first, before the pile grows.
+          <span className="font-semibold">Tip to get noticed:</span> apply to jobs posted less than a week
+          ago. Ideally, apply within 1 or 2 days of the posting. Early applicants tend to get seen first, before the
+          pile grows.
         </p>
       </div>
     </div>
