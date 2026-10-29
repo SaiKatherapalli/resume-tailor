@@ -23,7 +23,9 @@ export default function Navbar({ authed, onSignIn, onSignOut }: Props) {
   const email = getEmail() ?? '';
 
   // Close the account menu on navigation, on Escape, and when tapping anywhere else.
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
   useEffect(() => {
     if (!open) return;
     const onTap = (e: PointerEvent) => {

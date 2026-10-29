@@ -14,7 +14,9 @@ import { isAuthenticated, logout } from './lib/api';
 /** A new page should start at the top, like a normal website (a single-page app keeps the old scroll). */
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo({ top: 0 }), [pathname]);
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
   return null;
 }
 
