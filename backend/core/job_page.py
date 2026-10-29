@@ -68,6 +68,7 @@ class JobPosting:
     text: str  # the job description, ready for the tailor
     title: str = ""
     company: str = ""
+    job_number: str = ""  # the job's own ID, like REQ21135
 
 
 # ------------------------------------------------------------------ 1. is this link safe to open?
@@ -247,11 +248,47 @@ def _from_structured_data(blocks: list[str]) -> JobPosting | None:
         ident = posting.get("identifier")
         job_id = str(
             (ident.get("value") or ident.get("name") or "") if isinstance(ident, dict) else ident or ""
-        )
-        fields = {"Job title": title, "Company": company, "Job ID": job_id.strip()}
+        ).strip()
+        fields = {"Job title": title, "Company": company}
         header = "\n".join(f"{name}: {value}" for name, value in fields.items() if value)
-        return JobPosting(text=f"{header}\n\n{description}".strip(), title=title, company=company)
+        return JobPosting(
+            text=f"{header}\n\n{description}".strip(),
+            title=title,
+            company=company,
+            job_number="" if is_internal_id(job_id) else job_id,
+        )
     return None
+
+
+# ------------------------------------------------------------------ the job's own ID (e.g. REQ21135)
+
+_UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE)
+_LONG_HEX = re.compile(r"[0-9a-f]{20,}", re.IGNORECASE)
+# "Job ID: R-1234", "Requisition Number 5521", "Req ID: REQ21135". The ID must contain a digit.
+_LABELLED_ID = re.compile(
+    r"\b(?:job|requisition|req|reference|posting)\s*(?:id|number|no\.?|#|code)\s*[:#-]?\s*"
+    r"((?=[A-Za-z0-9_-]*\d)[A-Za-z0-9][A-Za-z0-9_-]{2,30})",
+    re.IGNORECASE,
+)
+# Many sites keep the real ID only in the data inside the page: "reqId":"REQ21135". Best keys first.
+_ID_KEYS = ("customJobReqId", "reqId", "requisitionId", "requisitionNumber", "jobReqId", "jobNumber")
+_ID_IN_DATA = re.compile(
+    r'"(' + "|".join(_ID_KEYS) + r')"\s*:\s*"([A-Za-z0-9][A-Za-z0-9_.-]{2,30})"', re.IGNORECASE
+)
+
+
+def is_internal_id(value: str) -> bool:
+    """A database ID like 662176bd-c1d9-4ea3-b22a-9b602ceba771 is not the number people see on the job."""
+    value = value.strip()
+    return bool(_UUID.fullmatch(value) or _LONG_HEX.fullmatch(value))
+
+
+def find_job_number(page: str, visible_text: str) -> str:
+    """The job's own ID: from the visible text first, then from the data inside the page. Or empty."""
+    if (match := _LABELLED_ID.search(visible_text)) and not is_internal_id(match.group(1)):
+        return match.group(1)
+    found = {k.lower(): v for k, v in reversed(_ID_IN_DATA.findall(page)) if not is_internal_id(v)}
+    return next((found[k.lower()] for k in _ID_KEYS if k.lower() in found), "")
 
 
 def _looks_like_job(text: str) -> bool:
@@ -264,12 +301,16 @@ def parse_job_page(page: str) -> JobPosting:
     reader.feed(page)
     reader.close()
 
+    visible = _tidy("".join(reader.parts))
     posting = _from_structured_data(reader.json_ld)
     if posting is None:
-        text = _tidy("".join(reader.parts))
-        if not _looks_like_job(text):
+        if not _looks_like_job(visible):
             raise JobPageError(_NOT_A_JOB)
-        posting = JobPosting(text=text)
+        posting = JobPosting(text=visible)
+
+    posting.job_number = posting.job_number or find_job_number(page, visible)
+    if posting.job_number and posting.job_number not in posting.text:
+        posting.text = f"Job ID: {posting.job_number}\n{posting.text}"  # so the tailor can see it
     posting.text = posting.text[:MAX_CHARS]
     return posting
 

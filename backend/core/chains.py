@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 from langchain_core.runnables import Runnable, RunnablePassthrough
 
+from core.job_page import is_internal_id
 from core.llm import get_structured_llm
 from core.prompts import analyze_prompt, rewrite_prompt
 from core.retrieval import BulletIndex, BulletRetriever
@@ -58,7 +59,7 @@ def analyze_job(chains: Chains, job_description: str) -> JDAnalysis:
     analysis = chains.analyze.invoke({"job_description": job_description})
     analysis.company = short_company(analysis.company)
     number = analysis.job_number.strip()
-    found = bool(number) and _squash(number) in _squash(job_description)
+    found = bool(number) and _squash(number) in _squash(job_description) and not is_internal_id(number)
     analysis.job_number = number if found else ""
     return analysis
 

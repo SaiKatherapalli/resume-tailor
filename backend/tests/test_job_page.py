@@ -60,7 +60,8 @@ def test_reads_title_company_and_description_from_structured_data():
     posting = fetch_job_posting("https://jobs.example.com/1", web(page(JSON_LD_PAGE)))
     assert posting.title == "Backend Engineer"
     assert posting.company == "Acme Corp"
-    assert posting.text.startswith("Job title: Backend Engineer\nCompany: Acme Corp\nJob ID: REQ-4471")
+    assert posting.job_number == "REQ-4471"
+    assert posting.text.startswith("Job ID: REQ-4471\nJob title: Backend Engineer\nCompany: Acme Corp")
     assert "REST APIs with Python and AWS" in posting.text
     assert "<p>" not in posting.text
 
@@ -199,3 +200,43 @@ def test_normal_redirect_is_followed_and_loops_are_stopped():
 
     with pytest.raises(JobPageError, match="Couldn't open"):
         fetch_job_posting("https://jobs.example.com/loop", web(forever))
+
+
+# ------------------------------------------------------------------ the job's own ID
+
+
+def snowflake_like_page(identifier: str, data: str = "") -> str:
+    """The structured data holds an internal database ID; the real ID is only in the page data."""
+    posting = {
+        "@type": "JobPosting",
+        "title": "Software Engineer",
+        "identifier": {"@type": "PropertyValue", "name": "Snowflake", "value": identifier},
+        "hiringOrganization": {"name": "Snowflake"},
+        "description": DESCRIPTION,
+    }
+    return (
+        f'<script type="application/ld+json">{json.dumps(posting)}</script>'
+        f"<script>window.__DATA__ = {data}</script><body>Software Engineer</body>"
+    )
+
+
+def test_internal_database_id_is_not_used_as_the_job_id():
+    page_data = '{"reqId":"REQ21135","other":{"reqId":"REQ99999"}}'  # the first one is this job's
+    html_page = snowflake_like_page("662176bd-c1d9-4ea3-b22a-9b602ceba771", page_data)
+    posting = fetch_job_posting("https://careers.example.com/1", web(page(html_page)))
+    assert posting.job_number == "REQ21135"
+    assert "662176bd" not in posting.text
+    assert posting.text.startswith("Job ID: REQ21135\n")
+
+
+def test_no_job_id_when_only_an_internal_id_exists():
+    html_page = snowflake_like_page("662176bd-c1d9-4ea3-b22a-9b602ceba771")
+    posting = fetch_job_posting("https://careers.example.com/2", web(page(html_page)))
+    assert posting.job_number == "" and "Job ID" not in posting.text
+
+
+def test_job_id_from_the_visible_text():
+    labelled = PLAIN_PAGE.replace("<h1>", "<h1>Job ID: 10583340 ")
+    assert fetch_job_posting("https://jobs.example.com/9", web(page(labelled))).job_number == "10583340"
+    # no ID on the page: nothing is made up
+    assert fetch_job_posting("https://jobs.example.com/10", web(page(PLAIN_PAGE))).job_number == ""

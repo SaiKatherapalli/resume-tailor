@@ -73,6 +73,8 @@ def test_job_number_is_kept_only_if_it_is_in_the_job_text():
     assert analyze_job(chains_returning(" A-3012345 "), text).job_number == "A-3012345"
     assert analyze_job(chains_returning("A-9999999"), text).job_number == ""  # made up
     assert analyze_job(chains_returning(""), text).job_number == ""
+    uuid = "662176bd-c1d9-4ea3-b22a-9b602ceba771"  # a database ID is not the job's number
+    assert analyze_job(chains_returning(uuid), text + " " + uuid).job_number == ""
 
 
 def test_short_company_drops_legal_endings():
