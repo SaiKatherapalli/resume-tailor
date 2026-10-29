@@ -240,3 +240,55 @@ def test_job_id_from_the_visible_text():
     assert fetch_job_posting("https://jobs.example.com/9", web(page(labelled))).job_number == "10583340"
     # no ID on the page: nothing is made up
     assert fetch_job_posting("https://jobs.example.com/10", web(page(PLAIN_PAGE))).job_number == ""
+
+
+# ------------------------------------------------------------------ Eightfold sites (Microsoft, ...)
+
+INTERNAL_ID = "662176bd-c1d9-4ea3-b22a-9b602ceba771"
+EIGHTFOLD_LINK = "https://apply.careers.acme.com/careers?query=engineer&pid=1970393557044839&sort_by=x"
+EIGHTFOLD_DATA = '{"fields": [{"fieldName": "display_job_id", "label": "Job number"}]}'
+
+
+def eightfold_web(api_status=200, api_body='{"data": {"displayJobId": "200063196"}}'):
+    """A fake careers site: the page has no job number, its API has one. `calls` records the API calls."""
+    calls = []
+
+    def handler(request):
+        if request.url.path == "/api/pcsx/position_details":
+            calls.append(dict(request.url.params))
+            return httpx.Response(api_status, text=api_body, headers={"content-type": "application/json"})
+        page_html = snowflake_like_page(INTERNAL_ID, EIGHTFOLD_DATA)
+        return httpx.Response(200, text=page_html, headers={"content-type": "text/html"})
+
+    return web(handler), calls
+
+
+def test_job_number_comes_from_the_eightfold_api():
+    client, calls = eightfold_web()
+    posting = fetch_job_posting(EIGHTFOLD_LINK, client)
+    assert posting.job_number == "200063196"
+    assert posting.text.startswith("Job ID: 200063196\n")
+    assert calls == [{"position_id": "1970393557044839", "domain": "acme.com", "hl": "en"}]
+
+
+@pytest.mark.parametrize(
+    "status,body", [(429, "Please try again later"), (200, "not json"), (200, '{"data": {}}')]
+)
+def test_eightfold_api_failure_means_no_job_number_not_an_error(status, body):
+    client, _ = eightfold_web(status, body)
+    posting = fetch_job_posting(EIGHTFOLD_LINK, client)
+    assert posting.job_number == ""  # the job text still comes back
+    assert "REST APIs with Python and AWS" in posting.text
+
+
+def test_no_extra_request_for_other_sites():
+    requests = []
+
+    def handler(request):
+        requests.append(request.url.path)
+        return httpx.Response(
+            200, text=snowflake_like_page(INTERNAL_ID), headers={"content-type": "text/html"}
+        )
+
+    fetch_job_posting(EIGHTFOLD_LINK, web(handler))  # has ?pid= but the page is not an Eightfold page
+    assert requests == ["/careers"]

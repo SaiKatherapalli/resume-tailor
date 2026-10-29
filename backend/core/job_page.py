@@ -20,7 +20,7 @@ import socket
 import time
 from dataclasses import dataclass
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import parse_qs, urljoin, urlsplit
 
 import httpx
 
@@ -277,6 +277,34 @@ _ID_IN_DATA = re.compile(
 )
 
 
+def eightfold_job_number(url: str, page: str, client: httpx.Client) -> str:
+    """
+    Career sites built on Eightfold (apply.careers.microsoft.com, ...) load the job in the browser and
+    keep its "Job number" out of the page. Their own small API gives it. Any failure just means no number.
+    """
+    parts = urlsplit(url)
+    position = parse_qs(parts.query).get("pid", [""])[0]
+    if not position.isdigit() or "display_job_id" not in page:
+        return ""
+    domain = ".".join((parts.hostname or "").split(".")[-2:])  # apply.careers.microsoft.com -> microsoft.com
+    try:
+        response = client.get(
+            f"{parts.scheme}://{parts.netloc}/api/pcsx/position_details",
+            params={"position_id": position, "domain": domain, "hl": "en"},
+            headers={**HEADERS, "Accept": "application/json"},
+            timeout=TIMEOUT,
+        )
+        data = response.json()["data"] if response.status_code == 200 else {}
+        number = str(data.get("displayJobId") or data.get("atsJobId") or "").strip()
+    except (httpx.HTTPError, ValueError, KeyError, AttributeError):
+        return ""
+    return (
+        number
+        if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{2,30}", number) and not is_internal_id(number)
+        else ""
+    )
+
+
 def is_internal_id(value: str) -> bool:
     """A database ID like 662176bd-c1d9-4ea3-b22a-9b602ceba771 is not the number people see on the job."""
     value = value.strip()
@@ -308,11 +336,15 @@ def parse_job_page(page: str) -> JobPosting:
             raise JobPageError(_NOT_A_JOB)
         posting = JobPosting(text=visible)
 
-    posting.job_number = posting.job_number or find_job_number(page, visible)
-    if posting.job_number and posting.job_number not in posting.text:
-        posting.text = f"Job ID: {posting.job_number}\n{posting.text}"  # so the tailor can see it
+    attach_job_number(posting, posting.job_number or find_job_number(page, visible))
     posting.text = posting.text[:MAX_CHARS]
     return posting
+
+
+def attach_job_number(posting: JobPosting, number: str) -> None:
+    posting.job_number = number
+    if number and number not in posting.text:
+        posting.text = f"Job ID: {number}\n{posting.text}"  # so the tailor can see it
 
 
 # ------------------------------------------------------------------ the one function to call
@@ -328,9 +360,13 @@ def fetch_job_posting(url: str, client: httpx.Client | None = None) -> JobPostin
     client = client or httpx.Client(follow_redirects=False)
     try:
         page = _download(url, client)
+        posting = parse_job_page(page)
+        if not posting.job_number:
+            attach_job_number(posting, eightfold_job_number(url, page, client))
+            posting.text = posting.text[:MAX_CHARS]
     except httpx.HTTPError:
         raise JobPageError(_UNREACHABLE) from None
     finally:
         if own_client:
             client.close()
-    return parse_job_page(page)
+    return posting
