@@ -5,6 +5,7 @@ Run:   uvicorn api.main:app --reload
 Docs:  http://127.0.0.1:8000/docs   (FastAPI makes this page for free)
 """
 
+import threading
 from contextlib import asynccontextmanager
 from typing import Annotated
 
@@ -20,6 +21,7 @@ from api.middleware import RateLimiter, add_request_logging, setup_logging
 from api.routes import auth, career_bank, jobs
 from api.worker import fail_interrupted_jobs
 from core.config import get_settings
+from core.embeddings import LocalEmbeddings
 
 
 def create_app(database_url: str | None = None) -> FastAPI:
@@ -37,6 +39,9 @@ def create_app(database_url: str | None = None) -> FastAPI:
         if settings.environment == "dev":
             Base.metadata.create_all(engine)
         fail_interrupted_jobs(engine)
+        if settings.environment == "prod":
+            # Load the embedding model now, in the background, so the first tailoring doesn't wait for it.
+            threading.Thread(target=LocalEmbeddings().embed_query, args=("warm up",), daemon=True).start()
         yield
         engine.dispose()  # runs once at shutdown
 

@@ -42,6 +42,16 @@ class BulletIndex:
         # Normalize once, so later cosine similarity is just a dot product (fast).
         self.matrix = matrix / np.clip(np.linalg.norm(matrix, axis=1, keepdims=True), 1e-9, None)
         self.bm25 = BM25Okapi([tokenize(c.text) for c in chunks])
+        self._query_vectors: dict[str, np.ndarray] = {}
+
+    def _embed_query(self, query: str) -> np.ndarray:
+        """Every experience searches with the same query, so embed it once (it is slow on a weak CPU)."""
+        if query not in self._query_vectors:
+            if len(self._query_vectors) >= 16:  # this index is reused across runs, so keep it small
+                self._query_vectors.clear()
+            q = np.array(self.embedder.embed_query(query), dtype=np.float32)
+            self._query_vectors[query] = q / max(float(np.linalg.norm(q)), 1e-9)
+        return self._query_vectors[query]
 
     @classmethod
     def build(cls, chunks: list[BulletChunk], embedder: Embeddings) -> "BulletIndex":
@@ -55,9 +65,7 @@ class BulletIndex:
             return []
 
         # 1. ranking by meaning (cosine)
-        q = np.array(self.embedder.embed_query(query), dtype=np.float32)
-        q /= max(float(np.linalg.norm(q)), 1e-9)
-        cosine = self.matrix[allowed] @ q
+        cosine = self.matrix[allowed] @ self._embed_query(query)
         by_meaning = [allowed[i] for i in np.argsort(-cosine)]
 
         # 2. ranking by exact words (BM25)
