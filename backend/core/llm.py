@@ -5,6 +5,7 @@ Other files ask for "an LLM that fills this Pydantic model" and never deal with
 API keys, model names or provider SDKs.
 """
 
+from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import Runnable
 from langchain_groq import ChatGroq
@@ -46,4 +47,6 @@ def get_structured_llm(schema: type[BaseModel], api_key: str | None = None) -> R
     (The default "tool calling" method failed on big outputs: the model sometimes
     answered in plain text instead of calling the tool.)
     """
-    return get_chat_model(api_key).with_structured_output(schema, method="json_schema")
+    structured = get_chat_model(api_key).with_structured_output(schema, method="json_schema")
+    # Now and then the model answers with a copy of the schema instead of values. Just ask again.
+    return structured.with_retry(retry_if_exception_type=(OutputParserException,), stop_after_attempt=3)

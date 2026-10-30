@@ -89,7 +89,7 @@ def build_rewrite_input(
     bank: CareerBank, analysis: JDAnalysis, candidates: dict[str, list], feedback: str = ""
 ) -> dict:
     """Fill every blank of rewrite_prompt."""
-    have, _ = split_keywords(bank, analysis.keywords)
+    have, missing = split_keywords(bank, analysis.keywords)
     experiences = []
     for exp in bank.experiences:
         docs = candidates[exp.id]
@@ -103,8 +103,8 @@ def build_rewrite_input(
     return {
         "job_title": analysis.job_title,
         "responsibilities": "\n".join(f"- {r}" for r in analysis.responsibilities),
-        "keywords": ", ".join(analysis.keywords),
         "honest_keywords": ", ".join(have) or "(none)",
+        "missing_keywords": ", ".join(missing) or "(none)",
         "original_summary": bank.summary,
         "skills_bank": "\n".join(f"{cat}: {', '.join(items)}" for cat, items in bank.skills.items()),
         "experiences": "\n\n".join(experiences),

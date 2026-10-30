@@ -8,8 +8,8 @@ def test_blanks_are_what_we_expect():
     assert set(rewrite_prompt.input_variables) == {
         "job_title",
         "responsibilities",
-        "keywords",
         "honest_keywords",
+        "missing_keywords",
         "original_summary",
         "skills_bank",
         "experiences",

@@ -141,12 +141,18 @@ export async function deleteJob(id: string): Promise<void> {
   await request(`/jobs/${id}`, { method: 'DELETE' });
 }
 
+/** The role without its team or details: "Software Engineer, Trust Platform (TPA)" -> "Software Engineer", at most 4 words. */
+function shortTitle(title: string | undefined): string {
+  const main = (title ?? '').split(/[,(:|]| - | – | — |\//)[0];
+  return main.trim().split(/\s+/).slice(0, 4).join(' ');
+}
+
 /** First name + role + company, e.g. Sai_Software_Engineer_Amazon_resume (no extension). */
 export function resumeFileName(fullName: string | undefined, jobTitle: string | undefined, company: string | undefined): string {
   const clean = (s: string | undefined) => (s ?? '').normalize('NFKD').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   const first = clean((fullName ?? '').trim().split(/\s+/)[0]);
   const firstName = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase(); // SAI -> Sai
-  return [firstName, clean(jobTitle), clean(company), 'resume'].filter(Boolean).join('_');
+  return [firstName, clean(shortTitle(jobTitle)), clean(company), 'resume'].filter(Boolean).join('_');
 }
 
 export async function downloadJobFile(id: string, kind: 'tex' | 'pdf', baseName?: string): Promise<void> {
