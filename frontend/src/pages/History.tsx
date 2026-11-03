@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, FileClock, Plus, Trash2 } from 'lucide-react';
+import { ChevronRight, FileClock, Plus, Search, SearchX, Trash2, X } from 'lucide-react';
 import { ApiError, deleteJob, listJobs } from '../lib/api';
 import type { JobSummary } from '../types';
 import StatusBadge from '../components/StatusBadge';
@@ -22,12 +22,19 @@ function ago(iso: string): string {
 export default function History() {
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     listJobs()
       .then(setJobs)
       .catch((e) => setError(e instanceof ApiError ? e.message : 'Could not load history.'));
   }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!jobs || !q) return jobs;
+    return jobs.filter((j) => [j.company, j.job_title, j.job_number].some((v) => v?.toString().toLowerCase().includes(q)));
+  }, [jobs, query]);
 
   const remove = async (id: string) => {
     if (!window.confirm('Delete this job?')) return;
@@ -55,6 +62,35 @@ export default function History() {
       >
         <div className="h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500" />
 
+        {jobs && jobs.length > 0 && (
+          <div className="flex items-center gap-3 px-4 sm:px-9 py-3.5 border-b border-slate-200 bg-slate-50/60">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
+                placeholder="Search by company, role or job ID"
+                aria-label="Search tailored resumes"
+                className="input !py-2.5 !pl-10 !pr-10 [&::-webkit-search-cancel-button]:hidden"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  aria-label="Clear search"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <p className="hidden sm:block shrink-0 text-xs text-slate-500 tabular-nums" aria-live="polite">
+              {query.trim() ? `${filtered?.length ?? 0} of ${jobs.length}` : `${jobs.length} ${jobs.length === 1 ? 'job' : 'jobs'}`}
+            </p>
+          </div>
+        )}
+
         {!jobs && !error && (
           <ul className="divide-y divide-slate-200">
             {[0, 1, 2].map((i) => (
@@ -75,8 +111,21 @@ export default function History() {
           </div>
         )}
 
+        {filtered?.length === 0 && jobs && jobs.length > 0 && (
+          <div className="text-center px-6 py-14">
+            <div className="mx-auto w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+              <SearchX size={22} />
+            </div>
+            <h2 className="mt-4 font-bold">No matches for “{query.trim()}”</h2>
+            <p className="text-slate-600 text-sm mt-1">Try a different company, role or job ID.</p>
+            <button onClick={() => setQuery('')} className="mt-4 text-sm font-semibold text-amber-600 hover:text-amber-700 transition">
+              Clear search
+            </button>
+          </div>
+        )}
+
         <ul className="divide-y divide-slate-200">
-          {jobs?.map((j, i) => (
+          {filtered?.map((j, i) => (
             <motion.li
               key={j.id}
               initial={{ opacity: 0, y: 8 }}
