@@ -12,6 +12,20 @@ export interface Education {
   details: string;
 }
 
+export interface SectionEntry {
+  heading: string;
+  date: string;
+  subtitle: string;
+  bullets: string[];
+}
+
+/** Any other resume section (Projects, Certifications, Awards...). Copied as-is. */
+export interface CustomSection {
+  title: string;
+  entries: SectionEntry[];
+  after_education: boolean;
+}
+
 export interface Experience {
   id: string;
   title: string;
@@ -29,6 +43,7 @@ export interface CareerBank {
   skills: Record<string, string[]>;
   experiences: Experience[];
   education: Education[];
+  sections: CustomSection[];
 }
 
 export type JobStatus = 'queued' | 'running' | 'done' | 'failed';

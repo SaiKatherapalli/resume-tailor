@@ -215,11 +215,54 @@
 
 \BLOCK{endif}
 \BLOCK{endfor}
+\BLOCK{for placement in ["before", "after"]}
+\BLOCK{for sec in sections if sec.after_education == (placement == "after")}
+% ============================================================
+% EXTRA SECTION (projects, certifications, ...)
+% ============================================================
+
+\section{\VAR{sec.title | upper}}
+
+\BLOCK{for entry in sec.entries}
+\experienceheader
+{\VAR{entry.heading}}
+{\VAR{entry.date}}
+\BLOCK{if entry.subtitle}
+
+{\fontsize{10}{11}\selectfont
+\VAR{entry.subtitle}
+}
+\BLOCK{endif}
+\BLOCK{if entry.bullets}
+\BLOCK{if not entry.subtitle}
+
+\vspace{-8pt}
+\BLOCK{endif}
+
+\begin{experiencebullets}
+    \setlength{\topsep}{0pt}
+    \setlength{\partopsep}{0pt}
+    \setlength{\parsep}{0pt}
+    \setlength{\itemsep}{0.15pt}
+
+\BLOCK{for bullet in entry.bullets}
+    \item \VAR{bullet}
+
+\BLOCK{endfor}
+\end{experiencebullets}
+\BLOCK{endif}
+\BLOCK{if not loop.last}
+
+\vspace{3pt}
+
+\BLOCK{endif}
+\BLOCK{endfor}
+\BLOCK{endfor}
+\BLOCK{if placement == "before" and education}
 % ============================================================
 % EDUCATION
 % ============================================================
 
-\BLOCK{if education}
 \section{EDUCATION}
 
 \BLOCK{for edu in education}
@@ -248,5 +291,6 @@
 \BLOCK{endif}
 \BLOCK{endfor}
 \BLOCK{endif}
+\BLOCK{endfor}
 
 \end{document}

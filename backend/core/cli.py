@@ -75,6 +75,8 @@ def cmd_check(args: argparse.Namespace) -> None:
     for e in bank.experiences:
         print(f"  {e.id}: {len(e.bullets)} bullets, shows {e.max_bullets}")
     print(f"  skills: {len(bank.all_skills())}, degrees: {len(bank.education)}")
+    for sec in bank.sections:
+        print(f"  {sec.title}: {len(sec.entries)} entries")
 
 
 # ------------------------------------------------------------------ output helpers

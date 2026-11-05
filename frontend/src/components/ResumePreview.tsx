@@ -1,9 +1,10 @@
-import type { CareerBank, TailorResult } from '../types';
+import type { CareerBank, CustomSection, TailorResult } from '../types';
 
-/** Shows the tailored resume. Header, job titles and education are copied from the career bank, as in the LaTeX. */
+/** Shows the tailored resume. Header, job titles, education and extra sections (projects, certifications...) are copied from the career bank, as in the LaTeX. */
 export default function ResumePreview({ bank, resume }: { bank: CareerBank | null; resume: TailorResult['resume'] }) {
   const byId = new Map(bank?.experiences.map((e) => [e.id, e]));
   const contact = bank?.contact;
+  const extraSections = (bank?.sections ?? []).filter((sec) => sec.entries.length > 0);
 
   return (
     <div
@@ -52,6 +53,8 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
         })}
       </Section>
 
+      {extraSections.filter((sec) => !sec.after_education).map(renderExtra)}
+
       {bank && bank.education.length > 0 && (
         <Section title="Education">
           {bank.education.map((ed, i) => (
@@ -64,7 +67,34 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
           ))}
         </Section>
       )}
+
+      {extraSections.filter((sec) => sec.after_education).map(renderExtra)}
     </div>
+  );
+}
+
+function renderExtra(sec: CustomSection, i: number) {
+  return (
+    <Section key={`${sec.title}-${i}`} title={sec.title}>
+      {sec.entries.map((entry, k) => (
+        <div key={k} className="mb-2 break-inside-avoid-page">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 print:flex-row print:justify-between print:gap-4">
+            <b>{entry.heading}</b>
+            <span className="text-slate-600 sm:whitespace-nowrap print:whitespace-nowrap">{entry.date}</span>
+          </div>
+          {entry.subtitle && <p>{entry.subtitle}</p>}
+          {entry.bullets.length > 0 && (
+            <ul className="list-disc pl-5 mt-1 space-y-0.5">
+              {entry.bullets.map((b, j) => (
+                <li key={j} className="break-inside-avoid text-justify [hyphens:auto]">
+                  {b}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </Section>
   );
 }
 

@@ -67,7 +67,12 @@ def analyze_job(chains: Chains, job_description: str) -> JDAnalysis:
 def split_keywords(bank: CareerBank, keywords: list[str]) -> tuple[list[str], list[str]]:
     """Which job keywords does the candidate really have? -> (have, missing)"""
     text = " ".join(
-        [bank.summary, *bank.all_skills(), *(b for e in bank.experiences for b in e.bullets)]
+        [
+            bank.summary,
+            *bank.all_skills(),
+            *(b for e in bank.experiences for b in e.bullets),
+            bank.extra_text(),
+        ]
     ).lower()
     have = [k for k in keywords if k.lower() in text]
     missing = [k for k in keywords if k.lower() not in text]

@@ -46,3 +46,49 @@ def test_dates_and_titles_come_from_bank_not_llm():
     tex = render_resume(BANK, resume)
     assert "Jun 2021 -- Dec 2022" in tex
     assert "Acme Corp" not in tex  # acme had no tailored bullets, so it is skipped
+
+
+def _bank_with_sections():
+    return type(BANK).model_validate(
+        {
+            **BANK.model_dump(),
+            "sections": [
+                {
+                    "title": "Projects",
+                    "entries": [
+                        {
+                            "heading": "Resume Tailor | demo.app",
+                            "date": "2026",
+                            "bullets": ["Built an app with 100% LangGraph."],
+                        }
+                    ],
+                },
+                {
+                    "title": "Certifications",
+                    "after_education": True,
+                    "entries": [{"heading": "AWS Developer", "date": "2025", "subtitle": "Amazon & Co"}],
+                },
+                {"title": "Empty", "entries": []},
+            ],
+        }
+    )
+
+
+def test_extra_sections_are_copied_as_is_in_order():
+    bank = _bank_with_sections()
+    tex = render_resume(bank, original_resume(bank))
+    assert (
+        tex.index("PROFESSIONAL EXPERIENCE")
+        < tex.index("PROJECTS")
+        < tex.index("EDUCATION")
+        < tex.index("CERTIFICATIONS")
+    )
+    assert r"Built an app with 100\% LangGraph." in tex
+    assert r"Amazon \& Co" in tex
+    assert "EMPTY" not in tex
+    assert r"\VAR" not in tex and r"\BLOCK" not in tex
+
+
+def test_no_extra_sections_means_no_extra_output():
+    tex = render_resume(BANK, original_resume(BANK))
+    assert "PROJECTS" not in tex

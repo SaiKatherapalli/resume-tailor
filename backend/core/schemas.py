@@ -30,6 +30,25 @@ class Education(BaseModel):
     details: str = ""  # e.g. "Related Coursework: ..."
 
 
+class SectionEntry(BaseModel):
+    """One item of an extra section: a project, a certification, an award...
+    Copied as-is, the LLM never changes it."""
+
+    heading: str  # e.g. "Resume Tailor | resumetailor-pro.vercel.app" or "AWS Certified Developer"
+    date: str = ""
+    subtitle: str = ""  # e.g. the issuing organisation
+    bullets: list[str] = []
+
+
+class CustomSection(BaseModel):
+    """Any resume section that is not summary, skills, experience or education
+    (Projects, Certifications, Awards, Publications...). Copied as-is."""
+
+    title: str  # as written on the resume, e.g. "Projects"
+    entries: list[SectionEntry] = []
+    after_education: bool = False  # True if the resume shows it below Education
+
+
 class Experience(BaseModel):
     """One job the user has had, with ALL their bullets for it."""
 
@@ -51,6 +70,7 @@ class CareerBank(BaseModel):
     skills: dict[str, list[str]]  # {"Cloud": ["AWS", "Docker"], ...}
     experiences: list[Experience] = Field(min_length=1)
     education: list[Education] = []
+    sections: list[CustomSection] = []  # every other section, in resume order
 
     @field_validator("experiences")
     @classmethod
@@ -60,6 +80,12 @@ class CareerBank(BaseModel):
         if duplicates:
             raise ValueError(f"duplicate experience ids: {sorted(duplicates)}")
         return experiences
+
+    def extra_text(self) -> str:
+        """Text of the extra sections. These are real facts too (e.g. tools used in a project)."""
+        return " ".join(
+            part for sec in self.sections for e in sec.entries for part in (e.heading, e.subtitle, *e.bullets)
+        )
 
     def all_skills(self) -> list[str]:
         """Every skill item in one flat list."""

@@ -34,3 +34,16 @@ def test_broken_yaml():
 def test_missing_required_field():
     with pytest.raises(CareerBankError, match="contact"):
         parse_career_bank("name: X\nsummary: s\nskills: {}\nexperiences: []")
+
+
+def test_old_banks_without_sections_still_load():
+    assert load_career_bank(SAMPLE).sections == []
+
+
+def test_extra_section_text_counts_as_real_facts():
+    data = load_career_bank(SAMPLE).model_dump()
+    data["sections"] = [
+        {"title": "Projects", "entries": [{"heading": "Tailor", "bullets": ["Used LangGraph"]}]}
+    ]
+    bank = type(load_career_bank(SAMPLE)).model_validate(data)
+    assert "LangGraph" in bank.extra_text()

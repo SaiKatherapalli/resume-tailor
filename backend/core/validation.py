@@ -102,7 +102,9 @@ def validate(bank: CareerBank, analysis: JDAnalysis, resume: TailoredResume) -> 
     # 3. Skills: keep only skills from the bank, or tools the bank's own text names
     #    (e.g. "Apache Kafka" in a bullet). Python fixes this, no retry needed.
     allowed = {s.lower() for s in bank_skills}
-    bank_text = " ".join([bank.summary, *bank_skills, *(b for e in bank.experiences for b in e.bullets)])
+    bank_text = " ".join(
+        [bank.summary, *bank_skills, *(b for e in bank.experiences for b in e.bullets), bank.extra_text()]
+    )
     skills: list[SkillRow] = []
     seen: set[str] = set()  # each skill appears once, in the first row that has it
     for row in resume.skills:

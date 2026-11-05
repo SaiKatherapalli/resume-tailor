@@ -66,3 +66,27 @@ def test_no_llm_key_gives_clear_error(client, auth, monkeypatch):
     r = client.post("/career-bank/import", files=files, headers=auth)
     assert r.status_code == 503
     assert "X-Groq-Api-Key" in r.json()["detail"]
+
+
+def test_extra_sections_are_saved_in_the_db(client, auth):
+    sections = [
+        {
+            "title": "Projects",
+            "entries": [{"heading": "Resume Tailor", "date": "2026", "bullets": ["Built it."]}],
+        },
+        {"title": "Certifications", "after_education": True, "entries": [{"heading": "AWS Developer"}]},
+    ]
+    assert (
+        client.put("/career-bank", json={**BANK_JSON, "sections": sections}, headers=auth).status_code == 200
+    )
+
+    saved = client.get("/career-bank", headers=auth).json()["sections"]
+    assert [s["title"] for s in saved] == ["Projects", "Certifications"]
+    assert saved[0]["entries"][0]["bullets"] == ["Built it."]
+    assert saved[1]["after_education"] is True
+
+
+def test_bank_saved_before_sections_existed_still_loads(client, auth):
+    old = {k: v for k, v in BANK_JSON.items() if k != "sections"}
+    client.put("/career-bank", json=old, headers=auth)
+    assert client.get("/career-bank", headers=auth).json()["sections"] == []

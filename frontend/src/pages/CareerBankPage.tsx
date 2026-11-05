@@ -1,8 +1,8 @@
 import { ChangeEvent, useEffect, useState } from 'react';
-import { Briefcase, ChevronRight, GraduationCap, Loader2, Plus, Save, Sparkles, Trash2, Upload, User, Wrench } from 'lucide-react';
+import { Briefcase, ChevronRight, GraduationCap, Layers, Loader2, Plus, Save, Sparkles, Trash2, Upload, User, Wrench } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { ApiError, getCareerBank, importResume, saveCareerBank } from '../lib/api';
-import type { CareerBank, Education, Experience } from '../types';
+import type { CareerBank, CustomSection, Education, Experience, SectionEntry } from '../types';
 import GroqKeyField from '../components/GroqKeyField';
 
 const emptyExperience = (n: number): Experience => ({
@@ -22,7 +22,10 @@ const emptyBank = (): CareerBank => ({
   skills: {},
   experiences: [emptyExperience(1)],
   education: [],
+  sections: [],
 });
+
+const emptyEntry = (): SectionEntry => ({ heading: '', date: '', subtitle: '', bullets: [] });
 
 const splitList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
 
@@ -37,7 +40,7 @@ export default function CareerBankPage() {
 
   useEffect(() => {
     getCareerBank()
-      .then(setBank)
+      .then((b) => setBank(b && { ...b, sections: b.sections ?? [] }))
       .catch((e) => setError(e instanceof ApiError ? e.message : 'Could not load your career bank.'))
       .finally(() => setLoading(false));
   }, []);
@@ -53,7 +56,8 @@ export default function CareerBankPage() {
     setNotice('');
     setImporting(true);
     try {
-      setBank(await importResume(file));
+      const imported = await importResume(file);
+      setBank({ ...imported, sections: imported.sections ?? [] });
       setDraft(true);
       setNotice('Imported. Check every field carefully, then click Save.');
     } catch (err) {
@@ -86,6 +90,11 @@ export default function CareerBankPage() {
     set({ experiences: bank!.experiences.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
   const setEdu = (i: number, patch: Partial<Education>) =>
     set({ education: bank!.education.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+
+  const setSection = (i: number, patch: Partial<CustomSection>) =>
+    set({ sections: bank!.sections.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
+  const setEntry = (i: number, k: number, patch: Partial<SectionEntry>) =>
+    setSection(i, { entries: bank!.sections[i].entries.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -246,6 +255,74 @@ export default function CareerBankPage() {
             ))}
             <button className="btn-outline" onClick={() => set({ experiences: [...bank.experiences, emptyExperience(bank.experiences.length + 1)] })}>
               <Plus size={16} /> Add job
+            </button>
+          </section>
+
+          <section className="space-y-5">
+            <SectionTitle icon={Layers} title="Other sections" />
+            <p className="text-sm text-slate-500 -mt-2">
+              Projects, certifications, awards... anything else on your resume. These are copied to the tailored resume as written.
+            </p>
+            {bank.sections.map((sec, i) => (
+              <div key={i} className="panel space-y-5">
+                <div className="grid sm:grid-cols-2 gap-3 sm:items-end">
+                  <Field label="Section title (e.g. Projects, Certifications)" value={sec.title} onChange={(v) => setSection(i, { title: v })} />
+                  <label className="flex items-center gap-2 text-sm text-slate-600 pb-2.5">
+                    <input type="checkbox" checked={sec.after_education} onChange={(e) => setSection(i, { after_education: e.target.checked })} />
+                    Show below Education
+                  </label>
+                </div>
+                {sec.entries.map((entry, k) => (
+                  <div key={k} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:p-4 space-y-3">
+                    <div className="grid sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2">
+                        <Field label="Name / heading" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
+                      </div>
+                      <Field label="Date (optional)" value={entry.date} onChange={(v) => setEntry(i, k, { date: v })} />
+                    </div>
+                    <Field label="Line under heading (optional, e.g. issuer)" value={entry.subtitle} onChange={(v) => setEntry(i, k, { subtitle: v })} />
+                    <div className="space-y-2">
+                      <label className="label">Bullets (optional)</label>
+                      {entry.bullets.map((b, j) => (
+                        <div key={j} className="flex gap-2">
+                          <textarea
+                            className="input min-h-[60px]"
+                            value={b}
+                            onChange={(e) => setEntry(i, k, { bullets: entry.bullets.map((x, m) => (m === j ? e.target.value : x)) })}
+                          />
+                          <button
+                            className="p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600 self-start"
+                            aria-label="Remove bullet"
+                            onClick={() => setEntry(i, k, { bullets: entry.bullets.filter((_, m) => m !== j) })}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      <button className="btn-outline" onClick={() => setEntry(i, k, { bullets: [...entry.bullets, ''] })}>
+                        <Plus size={16} /> Add bullet
+                      </button>
+                    </div>
+                    <button className="text-sm text-red-600 hover:underline" onClick={() => setSection(i, { entries: sec.entries.filter((_, j) => j !== k) })}>
+                      Remove this item
+                    </button>
+                  </div>
+                ))}
+                <button className="btn-outline" onClick={() => setSection(i, { entries: [...sec.entries, emptyEntry()] })}>
+                  <Plus size={16} /> Add item
+                </button>
+                <div>
+                  <button className="text-sm text-red-600 hover:underline" onClick={() => set({ sections: bank.sections.filter((_, j) => j !== i) })}>
+                    Remove this section
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              className="btn-outline"
+              onClick={() => set({ sections: [...bank.sections, { title: '', entries: [emptyEntry()], after_education: false }] })}
+            >
+              <Plus size={16} /> Add section
             </button>
           </section>
 

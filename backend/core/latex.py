@@ -97,6 +97,7 @@ def build_context(bank: CareerBank, resume: TailoredResume) -> dict:
         "skills": resume.skills,
         "experiences": experiences,
         "education": bank.education,
+        "sections": [sec for sec in bank.sections if sec.entries],
     }
 
 
