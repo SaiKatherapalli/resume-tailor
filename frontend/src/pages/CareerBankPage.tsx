@@ -154,7 +154,6 @@ export default function CareerBankPage() {
             Remove this section
           </button>
         </div>
-        <Field label="Section title" value={sec.title} onChange={(v) => setSection(i, { title: v })} />
       </section>
     );
   };
@@ -374,7 +373,10 @@ export default function CareerBankPage() {
 
           <button
             className="btn-outline"
-            onClick={() => set({ sections: [...bank.sections, { title: '', entries: [emptyEntry()], after_education: false }] })}
+            onClick={() => {
+              const title = window.prompt('Section name (e.g. Certifications, Awards)')?.trim();
+              if (title) set({ sections: [...bank.sections, { title, entries: [emptyEntry()], after_education: false }] });
+            }}
           >
             <Plus size={16} /> Add another section (projects, certifications, awards...)
           </button>
