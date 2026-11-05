@@ -15,7 +15,14 @@ from pathlib import Path
 import jinja2
 
 from core.config import PROJECT_ROOT
-from core.schemas import CareerBank, SkillRow, TailoredBullet, TailoredExperience, TailoredResume
+from core.schemas import (
+    CareerBank,
+    SkillRow,
+    TailoredBullet,
+    TailoredExperience,
+    TailoredResume,
+    link_label,
+)
 
 TEMPLATES_DIR = PROJECT_ROOT / "templates"
 
@@ -109,8 +116,9 @@ def build_context(bank: CareerBank, resume: TailoredResume) -> dict:
         )
 
     contact = bank.contact
+    # A link without an address is just a word, so it stays off the resume
     links = [
-        f"[{link.label}]({link.url})" if link.url else link.label for link in contact.links if link.label
+        f"[{link.label or link_label(link.url)}]({link.url})" for link in contact.links if link.url.strip()
     ]
     return {
         "name": bank.name,

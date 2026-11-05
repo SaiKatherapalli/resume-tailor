@@ -123,4 +123,5 @@ def test_header_links_are_real_links_in_the_pdf():
         }
     )
     tex = render_resume(bank, original_resume(bank))
-    assert r"a@b.c | \href{https://linkedin.com/in/me}{LinkedIn} | Portfolio" in tex
+    assert r"a@b.c | \href{https://linkedin.com/in/me}{LinkedIn}" in tex
+    assert "Portfolio" not in tex  # no address, so it is left off

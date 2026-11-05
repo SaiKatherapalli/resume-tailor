@@ -19,7 +19,7 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
               contact?.email,
               contact?.phone,
               contact?.location,
-              ...(contact?.links ?? []).filter((l) => l.label).map((l) => (l.url ? `[${l.label}](${l.url})` : l.label)),
+              ...(contact?.links ?? []).filter((l) => l.url.trim()).map((l) => `[${l.label || l.url}](${l.url})`),
             ]
               .filter(Boolean)
               .map((part, i) => (
