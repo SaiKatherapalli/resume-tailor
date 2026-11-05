@@ -96,6 +96,67 @@ export default function CareerBankPage() {
   const setEntry = (i: number, k: number, patch: Partial<SectionEntry>) =>
     setSection(i, { entries: bank!.sections[i].entries.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
 
+  const renderSection = (sec: CustomSection, i: number) => {
+    const one = sec.title.trim().replace(/s$/i, '') || 'Item';
+    return (
+      <section key={`section-${i}`} className="space-y-5">
+        <SectionTitle icon={Layers} title={sec.title.trim() || 'New section'} />
+        {sec.entries.map((entry, k) => (
+          <div key={k} className="panel space-y-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-600">
+              {one} {k + 1}
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <Field label="Name" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
+              </div>
+              <Field label="Date (optional)" value={entry.date} onChange={(v) => setEntry(i, k, { date: v })} />
+            </div>
+            <Field label="Line under the name (optional, e.g. issuer)" value={entry.subtitle} onChange={(v) => setEntry(i, k, { subtitle: v })} />
+            <div className="space-y-2">
+              <label className="label">Bullets (optional)</label>
+              {entry.bullets.map((b, j) => (
+                <div key={j} className="flex gap-2">
+                  <textarea
+                    className="input min-h-[60px]"
+                    value={b}
+                    onChange={(e) => setEntry(i, k, { bullets: entry.bullets.map((x, m) => (m === j ? e.target.value : x)) })}
+                  />
+                  <button
+                    className="p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600 self-start"
+                    aria-label="Remove bullet"
+                    onClick={() => setEntry(i, k, { bullets: entry.bullets.filter((_, m) => m !== j) })}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              <button className="btn-outline" onClick={() => setEntry(i, k, { bullets: [...entry.bullets, ''] })}>
+                <Plus size={16} /> Add bullet
+              </button>
+            </div>
+            <button className="text-sm text-red-600 hover:underline" onClick={() => setSection(i, { entries: sec.entries.filter((_, j) => j !== k) })}>
+              Remove this {one.toLowerCase()}
+            </button>
+          </div>
+        ))}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <button className="btn-outline" onClick={() => setSection(i, { entries: [...sec.entries, emptyEntry()] })}>
+            <Plus size={16} /> Add {one.toLowerCase()}
+          </button>
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" checked={sec.after_education} onChange={(e) => setSection(i, { after_education: e.target.checked })} />
+            Show below Education
+          </label>
+          <button className="text-sm text-red-600 hover:underline" onClick={() => set({ sections: bank!.sections.filter((_, j) => j !== i) })}>
+            Remove this section
+          </button>
+        </div>
+        <Field label="Section title" value={sec.title} onChange={(v) => setSection(i, { title: v })} />
+      </section>
+    );
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <PageHeader
@@ -258,73 +319,7 @@ export default function CareerBankPage() {
             </button>
           </section>
 
-          <section className="space-y-5">
-            <SectionTitle icon={Layers} title="Other sections" />
-            <p className="text-sm text-slate-500 -mt-2">
-              Projects, certifications, awards... anything else on your resume. These are copied to the tailored resume as written.
-            </p>
-            {bank.sections.map((sec, i) => (
-              <div key={i} className="panel space-y-5">
-                <div className="grid sm:grid-cols-2 gap-3 sm:items-end">
-                  <Field label="Section title (e.g. Projects, Certifications)" value={sec.title} onChange={(v) => setSection(i, { title: v })} />
-                  <label className="flex items-center gap-2 text-sm text-slate-600 pb-2.5">
-                    <input type="checkbox" checked={sec.after_education} onChange={(e) => setSection(i, { after_education: e.target.checked })} />
-                    Show below Education
-                  </label>
-                </div>
-                {sec.entries.map((entry, k) => (
-                  <div key={k} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:p-4 space-y-3">
-                    <div className="grid sm:grid-cols-3 gap-3">
-                      <div className="sm:col-span-2">
-                        <Field label="Name / heading" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
-                      </div>
-                      <Field label="Date (optional)" value={entry.date} onChange={(v) => setEntry(i, k, { date: v })} />
-                    </div>
-                    <Field label="Line under heading (optional, e.g. issuer)" value={entry.subtitle} onChange={(v) => setEntry(i, k, { subtitle: v })} />
-                    <div className="space-y-2">
-                      <label className="label">Bullets (optional)</label>
-                      {entry.bullets.map((b, j) => (
-                        <div key={j} className="flex gap-2">
-                          <textarea
-                            className="input min-h-[60px]"
-                            value={b}
-                            onChange={(e) => setEntry(i, k, { bullets: entry.bullets.map((x, m) => (m === j ? e.target.value : x)) })}
-                          />
-                          <button
-                            className="p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600 self-start"
-                            aria-label="Remove bullet"
-                            onClick={() => setEntry(i, k, { bullets: entry.bullets.filter((_, m) => m !== j) })}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
-                      <button className="btn-outline" onClick={() => setEntry(i, k, { bullets: [...entry.bullets, ''] })}>
-                        <Plus size={16} /> Add bullet
-                      </button>
-                    </div>
-                    <button className="text-sm text-red-600 hover:underline" onClick={() => setSection(i, { entries: sec.entries.filter((_, j) => j !== k) })}>
-                      Remove this item
-                    </button>
-                  </div>
-                ))}
-                <button className="btn-outline" onClick={() => setSection(i, { entries: [...sec.entries, emptyEntry()] })}>
-                  <Plus size={16} /> Add item
-                </button>
-                <div>
-                  <button className="text-sm text-red-600 hover:underline" onClick={() => set({ sections: bank.sections.filter((_, j) => j !== i) })}>
-                    Remove this section
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button
-              className="btn-outline"
-              onClick={() => set({ sections: [...bank.sections, { title: '', entries: [emptyEntry()], after_education: false }] })}
-            >
-              <Plus size={16} /> Add section
-            </button>
-          </section>
+          {bank.sections.map((sec, i) => (sec.after_education ? null : renderSection(sec, i)))}
 
           <section className="space-y-5">
             <SectionTitle icon={GraduationCap} title="Education" />
@@ -345,6 +340,15 @@ export default function CareerBankPage() {
               <Plus size={16} /> Add education
             </button>
           </section>
+
+          {bank.sections.map((sec, i) => (sec.after_education ? renderSection(sec, i) : null))}
+
+          <button
+            className="btn-outline"
+            onClick={() => set({ sections: [...bank.sections, { title: '', entries: [emptyEntry()], after_education: false }] })}
+          >
+            <Plus size={16} /> Add another section (projects, certifications, awards...)
+          </button>
 
           <div className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-4 z-30 flex justify-end rounded-2xl bg-white border border-slate-300 shadow-[0_12px_32px_-12px_rgba(15,23,42,0.35)] px-4 sm:px-5 py-3">
             <button className="btn-primary w-full sm:w-auto" onClick={save} disabled={saving}>
