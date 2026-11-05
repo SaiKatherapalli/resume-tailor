@@ -1,8 +1,13 @@
+export interface ContactLink {
+  label: string;
+  url: string;
+}
+
 export interface Contact {
   email: string;
   phone: string;
   location: string;
-  links: string[];
+  links: ContactLink[];
 }
 
 export interface Education {

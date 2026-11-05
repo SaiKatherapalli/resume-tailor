@@ -109,9 +109,12 @@ def build_context(bank: CareerBank, resume: TailoredResume) -> dict:
         )
 
     contact = bank.contact
+    links = [
+        f"[{link.label}]({link.url})" if link.url else link.label for link in contact.links if link.label
+    ]
     return {
         "name": bank.name,
-        "contact_parts": [p for p in (contact.location, contact.phone, contact.email, *contact.links) if p],
+        "contact_parts": [p for p in (contact.location, contact.phone, contact.email, *links) if p],
         "summary": resume.summary,
         "skills": resume.skills,
         "experiences": experiences,

@@ -15,7 +15,19 @@ export default function ResumePreview({ bank, resume }: { bank: CareerBank | nul
         <header className="text-center mb-4">
           <h2 className="text-2xl font-bold tracking-wide print:text-[20pt]">{bank.name}</h2>
           <p className="text-slate-600">
-            {[contact?.email, contact?.phone, contact?.location, ...(contact?.links ?? [])].filter(Boolean).join('  |  ')}
+            {[
+              contact?.email,
+              contact?.phone,
+              contact?.location,
+              ...(contact?.links ?? []).filter((l) => l.label).map((l) => (l.url ? `[${l.label}](${l.url})` : l.label)),
+            ]
+              .filter(Boolean)
+              .map((part, i) => (
+                <span key={i}>
+                  {i > 0 && '  |  '}
+                  {linkify(part as string)}
+                </span>
+              ))}
           </p>
         </header>
       )}

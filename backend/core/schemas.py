@@ -7,9 +7,35 @@ Two groups:
      The `description` on each field is sent to the LLM as an instruction.
 """
 
+import re
+
 from pydantic import BaseModel, Field, field_validator
 
 # ============================================================ 1. career bank
+
+
+_MARKDOWN_LINK = re.compile(r"^\[([^\]]+)\]\(([^)\s]+)\)$")
+_KNOWN_SITES = {
+    "linkedin.com": "LinkedIn",
+    "github.com": "GitHub",
+    "gitlab.com": "GitLab",
+    "leetcode.com": "LeetCode",
+    "kaggle.com": "Kaggle",
+    "medium.com": "Medium",
+}
+
+
+def link_label(url: str) -> str:
+    """'https://www.linkedin.com/in/me' -> 'LinkedIn'; an unknown site -> its domain."""
+    domain = re.sub(r"^https?://(www\.)?", "", url.strip().lower()).split("/")[0]
+    return next((name for site, name in _KNOWN_SITES.items() if domain.endswith(site)), domain or url)
+
+
+class ContactLink(BaseModel):
+    """A link in the resume header: the text people see and the address behind it."""
+
+    label: str  # "LinkedIn", "GitHub", "Portfolio"
+    url: str = ""  # empty = the resume shows the text only
 
 
 class Contact(BaseModel):
@@ -18,7 +44,24 @@ class Contact(BaseModel):
     email: str
     phone: str = ""
     location: str = ""
-    links: list[str] = []  # LinkedIn, GitHub, portfolio...
+    links: list[ContactLink] = []  # LinkedIn, GitHub, portfolio...
+
+    @field_validator("links", mode="before")
+    @classmethod
+    def accept_plain_strings(cls, links: list) -> list:
+        """Older banks keep links as strings: '[Text](url)', 'https://github.com/me' or just 'Text'."""
+        converted = []
+        for item in links or []:
+            if not isinstance(item, str):
+                converted.append(item)
+            elif m := _MARKDOWN_LINK.match(item.strip()):
+                converted.append({"label": m.group(1), "url": m.group(2)})
+            elif re.match(r"^(https?://|www\.|[\w-]+\.(com|io|dev|app|net|org|me)/)", item.strip(), re.I):
+                url = item.strip() if item.strip().lower().startswith("http") else f"https://{item.strip()}"
+                converted.append({"label": link_label(url), "url": url})
+            elif item.strip():
+                converted.append({"label": item.strip(), "url": ""})
+        return converted
 
 
 class Education(BaseModel):

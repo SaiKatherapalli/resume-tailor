@@ -90,3 +90,17 @@ def test_bank_saved_before_sections_existed_still_loads(client, auth):
     old = {k: v for k, v in BANK_JSON.items() if k != "sections"}
     client.put("/career-bank", json=old, headers=auth)
     assert client.get("/career-bank", headers=auth).json()["sections"] == []
+
+
+def test_header_links_are_stored_as_label_and_url(client, auth):
+    contact = {
+        **BANK_JSON["contact"],
+        "links": ["https://github.com/me", {"label": "Portfolio", "url": "https://me.dev"}],
+    }
+    client.put("/career-bank", json={**BANK_JSON, "contact": contact}, headers=auth)
+
+    links = client.get("/career-bank", headers=auth).json()["contact"]["links"]
+    assert links == [
+        {"label": "GitHub", "url": "https://github.com/me"},
+        {"label": "Portfolio", "url": "https://me.dev"},
+    ]

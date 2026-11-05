@@ -108,6 +108,10 @@ import_prompt = ChatPromptTemplate.from_messages(
             "- Skills: keep the same categories and items.\n"
             "- Links: write every link as [visible text](https://url). LaTeX "
             "\\href{{https://x.app}}{{Live Demo}} becomes [Live Demo](https://x.app). Never drop a link.\n"
+            "- Header links (LinkedIn, GitHub, portfolio...): one item per link in contact.links. "
+            "label = the text shown on the resume (e.g. 'LinkedIn'), url = the address behind it "
+            "(written as [LinkedIn](https://...) in the text). If the resume shows the address itself, "
+            "use it as both. url is empty only if no address is given.\n"
             "- Education details: coursework or extra lines, copied as-is.\n\n"
             "<resume>\n{resume_text}\n</resume>",
         ),

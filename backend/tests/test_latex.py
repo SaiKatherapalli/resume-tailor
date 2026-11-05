@@ -110,3 +110,17 @@ def test_link_in_extra_section_heading_is_rendered():
     )
     tex = render_resume(bank, original_resume(bank))
     assert r"Tailor | \href{https://x.app}{Live Demo}" in tex
+
+
+def test_header_links_are_real_links_in_the_pdf():
+    bank = type(BANK).model_validate(
+        {
+            **BANK.model_dump(),
+            "contact": {
+                "email": "a@b.c",
+                "links": [{"label": "LinkedIn", "url": "https://linkedin.com/in/me"}, {"label": "Portfolio"}],
+            },
+        }
+    )
+    tex = render_resume(bank, original_resume(bank))
+    assert r"a@b.c | \href{https://linkedin.com/in/me}{LinkedIn} | Portfolio" in tex

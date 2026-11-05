@@ -47,3 +47,25 @@ def test_extra_section_text_counts_as_real_facts():
     ]
     bank = type(load_career_bank(SAMPLE)).model_validate(data)
     assert "LangGraph" in bank.extra_text()
+
+
+def test_contact_links_accept_old_strings_and_new_pairs():
+    from core.schemas import Contact
+
+    c = Contact(
+        email="a@b.c",
+        links=[
+            "https://www.linkedin.com/in/me",
+            "github.com/me",
+            "[Portfolio](https://me.dev)",
+            "Just text",
+            {"label": "Blog", "url": "https://blog.me"},
+        ],
+    )
+    assert [(link.label, link.url) for link in c.links] == [
+        ("LinkedIn", "https://www.linkedin.com/in/me"),
+        ("GitHub", "https://github.com/me"),
+        ("Portfolio", "https://me.dev"),
+        ("Just text", ""),
+        ("Blog", "https://blog.me"),
+    ]

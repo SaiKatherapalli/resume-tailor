@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { Briefcase, ChevronRight, GraduationCap, Layers, Loader2, Plus, Save, Sparkles, Trash2, Upload, User, Wrench } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { ApiError, getCareerBank, importResume, saveCareerBank } from '../lib/api';
-import type { CareerBank, CustomSection, Education, Experience, SectionEntry } from '../types';
+import type { CareerBank, ContactLink, CustomSection, Education, Experience, SectionEntry } from '../types';
 import GroqKeyField from '../components/GroqKeyField';
 
 const emptyExperience = (n: number): Experience => ({
@@ -91,6 +91,8 @@ export default function CareerBankPage() {
   const setEdu = (i: number, patch: Partial<Education>) =>
     set({ education: bank!.education.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
 
+  const setLink = (i: number, patch: Partial<ContactLink>) =>
+    set({ contact: { ...bank!.contact, links: bank!.contact.links.map((x, j) => (j === i ? { ...x, ...patch } : x)) } });
   const setSection = (i: number, patch: Partial<CustomSection>) =>
     set({ sections: bank!.sections.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
   const setEntry = (i: number, k: number, patch: Partial<SectionEntry>) =>
@@ -208,11 +210,38 @@ export default function CareerBankPage() {
               <Field label="Phone" value={bank.contact.phone} onChange={(v) => set({ contact: { ...bank.contact, phone: v } })} />
               <Field label="Location" value={bank.contact.location} onChange={(v) => set({ contact: { ...bank.contact, location: v } })} />
             </div>
-            <Field
-              label="Links (comma separated)"
-              value={bank.contact.links.join(', ')}
-              onChange={(v) => set({ contact: { ...bank.contact, links: splitList(v) } })}
-            />
+            <div className="space-y-2">
+              <label className="label">Links (LinkedIn, GitHub, portfolio...)</label>
+              {bank.contact.links.map((link, i) => (
+                <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                  <input
+                    className="input sm:w-1/3"
+                    placeholder="Text shown, e.g. LinkedIn"
+                    value={link.label}
+                    onChange={(e) => setLink(i, { label: e.target.value })}
+                  />
+                  <input
+                    className="input flex-1"
+                    placeholder="https://..."
+                    value={link.url}
+                    onChange={(e) => setLink(i, { url: e.target.value })}
+                  />
+                  <button
+                    className="self-end sm:self-auto p-2.5 sm:p-2 text-slate-400 hover:text-red-600 active:text-red-600"
+                    aria-label="Remove link"
+                    onClick={() => set({ contact: { ...bank.contact, links: bank.contact.links.filter((_, j) => j !== i) } })}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              <button
+                className="btn-outline"
+                onClick={() => set({ contact: { ...bank.contact, links: [...bank.contact.links, { label: '', url: '' }] } })}
+              >
+                <Plus size={16} /> Add link
+              </button>
+            </div>
             <div>
               <label className="label">Summary</label>
               <textarea className="input min-h-[90px]" value={bank.summary} onChange={(e) => set({ summary: e.target.value })} />
