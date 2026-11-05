@@ -92,3 +92,21 @@ def test_extra_sections_are_copied_as_is_in_order():
 def test_no_extra_sections_means_no_extra_output():
     tex = render_resume(BANK, original_resume(BANK))
     assert "PROJECTS" not in tex
+
+
+def test_markdown_link_becomes_a_real_latex_link():
+    out = escape_latex("Resume Tailor | [Live Demo](https://app.vercel.app/a_b?x=1&y=2#top) & more_")
+    assert out == (r"Resume Tailor | \href{https://app.vercel.app/a_b?x=1&y=2\#top}{Live Demo} \& more\_")
+
+
+def test_link_in_extra_section_heading_is_rendered():
+    bank = type(BANK).model_validate(
+        {
+            **BANK.model_dump(),
+            "sections": [
+                {"title": "Projects", "entries": [{"heading": "Tailor | [Live Demo](https://x.app)"}]}
+            ],
+        }
+    )
+    tex = render_resume(bank, original_resume(bank))
+    assert r"Tailor | \href{https://x.app}{Live Demo}" in tex

@@ -79,15 +79,15 @@ function renderExtra(sec: CustomSection, i: number) {
       {sec.entries.map((entry, k) => (
         <div key={k} className="mb-2 break-inside-avoid-page">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 print:flex-row print:justify-between print:gap-4">
-            <b>{entry.heading}</b>
+            <b>{linkify(entry.heading)}</b>
             <span className="text-slate-600 sm:whitespace-nowrap print:whitespace-nowrap">{entry.date}</span>
           </div>
-          {entry.subtitle && <p>{entry.subtitle}</p>}
+          {entry.subtitle && <p>{linkify(entry.subtitle)}</p>}
           {entry.bullets.length > 0 && (
             <ul className="list-disc pl-5 mt-1 space-y-0.5">
               {entry.bullets.map((b, j) => (
                 <li key={j} className="break-inside-avoid text-justify [hyphens:auto]">
-                  {b}
+                  {linkify(b)}
                 </li>
               ))}
             </ul>
@@ -105,4 +105,22 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       {children}
     </section>
   );
+}
+
+/** "[Live Demo](https://x.app)" becomes a link; everything else stays plain text. */
+function linkify(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  const re = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    parts.push(text.slice(last, m.index));
+    parts.push(
+      <a key={m.index} href={m[2]} target="_blank" rel="noopener noreferrer" className="underline">
+        {m[1]}
+      </a>,
+    );
+    last = m.index! + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return parts;
 }

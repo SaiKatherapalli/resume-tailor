@@ -106,6 +106,8 @@ import_prompt = ChatPromptTemplate.from_messages(
             "(e.g. 'tmobile', 'citi').\n"
             "- max_bullets: the number of bullets that job has (maximum 15).\n"
             "- Skills: keep the same categories and items.\n"
+            "- Links: write every link as [visible text](https://url). LaTeX "
+            "\\href{{https://x.app}}{{Live Demo}} becomes [Live Demo](https://x.app). Never drop a link.\n"
             "- Education details: coursework or extra lines, copied as-is.\n\n"
             "<resume>\n{resume_text}\n</resume>",
         ),
@@ -128,8 +130,10 @@ sections_prompt = ChatPromptTemplate.from_messages(
             "(e.g. 'Projects'). Each item of a section is one entry: heading = its name (keep any link "
             "or tech list that is part of the title line), date = its date or empty, subtitle = a line "
             "under the heading such as the issuing organisation or empty, bullets = its bullets copied "
-            "word for word as plain text (empty list if it has none). Remove LaTeX commands (write 25% "
-            "not 25\\%). after_education = true only if the section comes after Education.\n\n"
+            "word for word as plain text (empty list if it has none). Write every link as "
+            "[visible text](https://url) (LaTeX \\href{{https://x.app}}{{Live Demo}} becomes "
+            "[Live Demo](https://x.app)). Remove other LaTeX commands (write 25% not 25\\%). "
+            "after_education = true only if the section comes after Education.\n\n"
             "<resume>\n{resume_text}\n</resume>",
         ),
     ]

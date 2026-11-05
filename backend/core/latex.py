@@ -49,11 +49,30 @@ _REPLACE = {
 _PATTERN = re.compile("|".join(re.escape(k) for k in _REPLACE))
 
 
+# [text](https://link) is the one bit of markup we allow, so a resume can keep its links
+_LINK = re.compile(r"\[([^\]]+)\]\((https?://[^)\s]+)\)")
+
+
+def _escape_plain(text: str) -> str:
+    return _PATTERN.sub(lambda m: _REPLACE[m.group()], text)
+
+
+def _href(match: re.Match) -> str:
+    url = match.group(2).replace("%", r"\%").replace("#", r"\#")  # the only two that break \href
+    return rf"\href{{{url}}}{{{_escape_plain(match.group(1))}}}"
+
+
 def escape_latex(value: object) -> str:
-    """'Cut time by 30% & cost' -> 'Cut time by 30\\% \\& cost'"""
+    """'Cut time by 30% & cost' -> 'Cut time by 30\\% \\& cost'. '[Demo](https://x.app)' -> a real link."""
     if value is None:
         return ""
-    return _PATTERN.sub(lambda m: _REPLACE[m.group()], str(value))
+    text = str(value)
+    out, last = [], 0
+    for m in _LINK.finditer(text):
+        out += [_escape_plain(text[last : m.start()]), _href(m)]
+        last = m.end()
+    out.append(_escape_plain(text[last:]))
+    return "".join(out)
 
 
 # ------------------------------------------------------------------ 2. render
