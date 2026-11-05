@@ -108,7 +108,7 @@ export default function CareerBankPage() {
             </p>
             <div className="grid sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
-                <Field label="Name (links: [Live Demo](https://your-link))" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
+                <Field label="Name" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
               </div>
               <Field label="Date (optional)" value={entry.date} onChange={(v) => setEntry(i, k, { date: v })} />
             </div>
