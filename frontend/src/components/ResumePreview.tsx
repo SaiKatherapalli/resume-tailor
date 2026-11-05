@@ -91,7 +91,7 @@ function renderExtra(sec: CustomSection, i: number) {
       {sec.entries.map((entry, k) => (
         <div key={k} className="mb-2 break-inside-avoid-page">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:gap-4 print:flex-row print:justify-between print:gap-4">
-            <b>{linkify(entry.heading)}</b>
+            <b>{linkify(entry.link_url?.trim() ? `${entry.heading} | [${entry.link_label.trim() || entry.link_url}](${entry.link_url.trim()})` : entry.heading)}</b>
             <span className="text-slate-600 sm:whitespace-nowrap print:whitespace-nowrap">{entry.date}</span>
           </div>
           {entry.subtitle && <p>{linkify(entry.subtitle)}</p>}

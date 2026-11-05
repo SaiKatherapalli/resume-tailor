@@ -9,11 +9,12 @@ Two groups:
 
 import re
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # ============================================================ 1. career bank
 
 
+_TRAILING_LINK = re.compile(r"^(.*?)\s*\|?\s*\[([^\]]+)\]\((https?://[^)\s]+)\)\s*$")
 _MARKDOWN_LINK = re.compile(r"^\[([^\]]+)\]\(([^)\s]+)\)$")
 _KNOWN_SITES = {
     "linkedin.com": "LinkedIn",
@@ -77,10 +78,30 @@ class SectionEntry(BaseModel):
     """One item of an extra section: a project, a certification, an award...
     Copied as-is, the LLM never changes it."""
 
-    heading: str  # e.g. "Resume Tailor | resumetailor-pro.vercel.app" or "AWS Certified Developer"
+    heading: str  # e.g. "Resume Tailor" or "AWS Certified Developer"
     date: str = ""
     subtitle: str = ""  # e.g. the issuing organisation
     bullets: list[str] = []
+    link_label: str = ""  # e.g. "Live Demo", shown after the heading
+    link_url: str = ""  # its address; no address = no link on the resume
+
+    @model_validator(mode="before")
+    @classmethod
+    def split_link_out_of_heading(cls, data):
+        """Older banks wrote the link inside the heading: 'Name | [Live Demo](https://...)'."""
+        if isinstance(data, dict) and not data.get("link_url"):
+            m = _TRAILING_LINK.match(str(data.get("heading", "")))
+            if m:
+                data = {**data, "heading": m.group(1), "link_label": m.group(2), "link_url": m.group(3)}
+        return data
+
+    @property
+    def heading_with_link(self) -> str:
+        """What the resume shows on the title line. The link is written as [text](url)."""
+        if not self.link_url.strip():
+            return self.heading
+        label = self.link_label.strip() or link_label(self.link_url)
+        return f"{self.heading} | [{label}]({self.link_url.strip()})"
 
 
 class CustomSection(BaseModel):

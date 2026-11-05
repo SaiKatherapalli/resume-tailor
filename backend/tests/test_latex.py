@@ -125,3 +125,31 @@ def test_header_links_are_real_links_in_the_pdf():
     tex = render_resume(bank, original_resume(bank))
     assert r"a@b.c | \href{https://linkedin.com/in/me}{LinkedIn}" in tex
     assert "Portfolio" not in tex  # no address, so it is left off
+
+
+def test_project_link_is_its_own_pair_and_renders_as_a_link():
+    bank = type(BANK).model_validate(
+        {
+            **BANK.model_dump(),
+            "sections": [
+                {
+                    "title": "Projects",
+                    "entries": [
+                        {"heading": "Tailor", "link_label": "Live Demo", "link_url": "https://x.app"},
+                        {"heading": "No link", "link_label": "Live Demo"},
+                    ],
+                }
+            ],
+        }
+    )
+    tex = render_resume(bank, original_resume(bank))
+    assert r"Tailor | \href{https://x.app}{Live Demo}" in tex
+    assert "No link}" in tex and "Live Demo}" not in tex.split("No link")[1]  # label alone is not shown
+
+
+def test_old_heading_with_markdown_link_is_split_into_the_pair():
+    from core.schemas import SectionEntry
+
+    e = SectionEntry(heading="Resume Tailor -- AI App | [Live Demo](https://x.app/)")
+    assert (e.heading, e.link_label, e.link_url) == ("Resume Tailor -- AI App", "Live Demo", "https://x.app/")
+    assert e.heading_with_link == "Resume Tailor -- AI App | [Live Demo](https://x.app/)"

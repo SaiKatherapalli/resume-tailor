@@ -25,7 +25,7 @@ const emptyBank = (): CareerBank => ({
   sections: [],
 });
 
-const emptyEntry = (): SectionEntry => ({ heading: '', date: '', subtitle: '', bullets: [] });
+const emptyEntry = (): SectionEntry => ({ heading: '', date: '', subtitle: '', bullets: [], link_label: '', link_url: '' });
 
 const splitList = (s: string) => s.split(',').map((x) => x.trim()).filter(Boolean);
 
@@ -113,6 +113,12 @@ export default function CareerBankPage() {
                 <Field label="Name" value={entry.heading} onChange={(v) => setEntry(i, k, { heading: v })} />
               </div>
               <Field label="Date (optional)" value={entry.date} onChange={(v) => setEntry(i, k, { date: v })} />
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <Field label="Link text (optional, e.g. Live Demo)" value={entry.link_label} onChange={(v) => setEntry(i, k, { link_label: v })} />
+              <div className="sm:col-span-2">
+                <Field label="Link address (https://...)" value={entry.link_url} onChange={(v) => setEntry(i, k, { link_url: v })} />
+              </div>
             </div>
             <Field label="Line under the name (optional, e.g. issuer)" value={entry.subtitle} onChange={(v) => setEntry(i, k, { subtitle: v })} />
             <div className="space-y-2">

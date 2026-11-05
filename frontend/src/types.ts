@@ -22,6 +22,8 @@ export interface SectionEntry {
   date: string;
   subtitle: string;
   bullets: string[];
+  link_label: string;
+  link_url: string;
 }
 
 /** Any other resume section (Projects, Certifications, Awards...). Copied as-is. */
