@@ -89,3 +89,39 @@ def test_no_second_call_when_nothing_is_missing(monkeypatch):
     monkeypatch.setattr(resume_import, "get_structured_llm", fake_llm)
     resume_import.import_resume(LATEX)
     assert calls == ["ImportedBank"]
+
+
+def _pdf_with_link() -> bytes:
+    """A one-page PDF: 'Resume Tailor | Live Demo' where 'Live Demo' is a clickable link."""
+    import io
+
+    from pypdf import PdfWriter
+    from pypdf.annotations import Link
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+
+    writer = PdfWriter()
+    page = writer.add_blank_page(612, 792)
+    font = DictionaryObject(
+        {
+            NameObject("/Type"): NameObject("/Font"),
+            NameObject("/Subtype"): NameObject("/Type1"),
+            NameObject("/BaseFont"): NameObject("/Helvetica"),
+        }
+    )
+    page[NameObject("/Resources")] = DictionaryObject(
+        {NameObject("/Font"): DictionaryObject({NameObject("/F1"): writer._add_object(font)})}
+    )
+    stream = DecodedStreamObject()
+    stream.set_data(
+        b"BT /F1 12 Tf 72 700 Td (Resume Tailor |) Tj ET BT /F1 12 Tf 170 700 Td (Live Demo) Tj ET"
+    )
+    page[NameObject("/Contents")] = writer._add_object(stream)
+    writer.add_annotation(0, Link(rect=(169, 697, 235, 713), url="https://x.app/demo"))
+    buffer = io.BytesIO()
+    writer.write(buffer)
+    return buffer.getvalue()
+
+
+def test_pdf_link_address_is_put_back_next_to_its_text():
+    text = resume_import.pdf_text(_pdf_with_link())
+    assert "Resume Tailor | [Live Demo](https://x.app/demo)" in text

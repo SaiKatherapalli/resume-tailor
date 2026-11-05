@@ -1,7 +1,9 @@
 """Turn any resume text (LaTeX, plain text, text from a PDF) into a CareerBank using the LLM."""
 
+import io
 import re
 
+import pdfplumber
 from pydantic import BaseModel, Field
 
 from core.llm import get_structured_llm
@@ -48,6 +50,39 @@ _KNOWN_EXTRA_HEADINGS = {
     "languages",
     "interests",
 }
+
+
+def pdf_text(data: bytes) -> str:
+    """Text of a PDF, with every web link written as [visible text](url).
+
+    A PDF keeps a link's address apart from its text: a clickable box (position + URL) lies over
+    the words. We find the words inside each box and put the address back next to them.
+    """
+    pages = []
+    with pdfplumber.open(io.BytesIO(data)) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text() or ""
+            missing = []
+            for link in page.hyperlinks:
+                url = link.get("uri") or ""
+                if not url.startswith(("http://", "https://")):
+                    continue
+                box = (
+                    max(link["x0"] - 1, 0),
+                    max(link["top"] - 1, 0),
+                    min(link["x1"] + 1, page.width),
+                    min(link["bottom"] + 1, page.height),
+                )
+                words = " ".join((page.within_bbox(box).extract_text() or "").split())
+                if not words or url.lower().rstrip("/").endswith(words.lower().rstrip("/")):
+                    continue  # no text under the box, or the text already shows the address
+                marked = f"[{words}]({url})"
+                if words in text:
+                    text = text.replace(words, marked, 1)
+                else:
+                    missing.append(marked)
+            pages.append("\n".join([text, *missing]))
+    return "\n".join(pages)
 
 
 class ImportedBank(CareerBank):

@@ -7,16 +7,14 @@ The logged-in user's career bank.
                              It is NOT saved: the user checks it, edits it, then saves it with PUT.
 """
 
-import io
 from typing import Annotated
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
-from pypdf import PdfReader
 from sqlalchemy import select
 
 from api.deps import DB, CurrentUser, GroqKey
 from api.models import CareerBankRecord
-from core.resume_import import import_resume
+from core.resume_import import import_resume, pdf_text
 from core.schemas import CareerBank
 
 router = APIRouter(prefix="/career-bank", tags=["career bank"])
@@ -66,7 +64,7 @@ def extract_text(filename: str, data: bytes) -> str:
     name = filename.lower()
     if name.endswith(".pdf"):
         try:
-            return "\n".join(page.extract_text() or "" for page in PdfReader(io.BytesIO(data)).pages)
+            return pdf_text(data)
         except Exception:
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_CONTENT, "This PDF could not be read."

@@ -25,6 +25,7 @@ dependencies = [
     "pyjwt>=2.8",              # login tokens (JWT)
     "python-multipart>=0.0.9", # read form data and file uploads
     "pypdf>=4.0",              # read text from uploaded PDF resumes
+    "pdfplumber>=0.11",        # PDF text with link addresses (Live Demo -> its URL)
     "alembic>=1.13",           # database migrations (versioned table changes)
     "psycopg[binary]>=3.1",    # PostgreSQL driver (used on the server)
     "httpx>=0.27",             # download the page behind a job link
